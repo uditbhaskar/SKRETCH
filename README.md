@@ -1,62 +1,44 @@
 # SKRETCH
 
-**GitHub description:** Jetpack Compose scratch-card UI library with silver foil overlays, drag-to-reveal, and customizable card chrome. Ships as a JitPack-ready `:scratch` module.
+Scratch cards for Jetpack Compose. Drag across the foil, reveal what's underneath.
 
-SKRETCH is a Jetpack Compose library for scratch-card interactions: users drag across a metallic foil layer to reveal whatever you place underneath (rewards, coupons, images, copy, and so on). The `:scratch` module is the publishable artifact; `:app` is a demo only.
-
-This README is the project source of truth for scope, API, setup, and roadmap.
+**GitHub description:** Jetpack Compose scratch-card library with silver foil overlays, drag-to-reveal, and customizable card chrome. JitPack-ready.
 
 ---
 
-## Features
+## What is this?
 
-This README is the main reference for what we're building and how the project is organized. Useful if you're picking the project back up, onboarding someone, or continuing with AI assistance.
+SKRETCH gives you a `ScratchCard` composable that works like the scratch-off rewards you see in promo and wallet apps. Put any composable behind a silver foil layer. The user scratches it away with their finger. When enough area is cleared, the card auto-reveals.
+
+You get progress callbacks, haptics on first scratch, and a fade-out animation. The library handles the hard parts: foil rendering, touch erasure, and coverage tracking.
+
+**What ships:** the `:scratch` module (the library).  
+**What doesn't ship:** the `:app` module (demo only).
 
 ---
 
-## Quick start
+## Try it
 
-### Run the demo
+Clone the repo, open in Android Studio, run `app`.
 
 ```bash
 ./gradlew :app:assembleDebug
 ```
 
-Open the project in Android Studio and run the `app` configuration. The demo includes random prize outcomes and a circular restart control after reveal.
+The demo scratches random rewards (cashback, free delivery, "better luck next time", etc.) and lets you restart with the circular button at the bottom.
 
-### Use the library (local module)
+---
+
+## Add to your project
+
+### Option A — JitPack
+
+1. Replace `YOUR_USERNAME` in `scratch/build.gradle.kts` with your GitHub username.
+2. Tag a release (e.g. `0.1.0`).
+3. Add JitPack to your repositories and depend on the artifact:
 
 ```kotlin
 // settings.gradle.kts
-include(":scratch")
-
-// app/build.gradle.kts
-dependencies {
-    implementation(project(":scratch"))
-}
-```
-
-```kotlin
-import com.example.skretch.scratch.component.ScratchCard
-
-ScratchCard(
-    modifier = Modifier.size(width = 320.dp, height = 200.dp),
-    revealThreshold = 0.45f,
-    brushWidth = 52.dp,
-    onScratchProgress = { progress -> /* 0f .. 1f */ },
-    onRevealed = { /* threshold reached; progress reports 1f */ },
-) {
-    // Your hidden reward content
-    RewardContent()
-}
-```
-
-### Use the library (JitPack)
-
-Replace `YOUR_USERNAME` in `scratch/build.gradle.kts` before tagging a release.
-
-```kotlin
-// settings.gradle.kts or root build.gradle.kts
 dependencyResolutionManagement {
     repositories {
         google()
@@ -64,148 +46,94 @@ dependencyResolutionManagement {
         maven { url = uri("https://jitpack.io") }
     }
 }
+```
 
+```kotlin
 // app/build.gradle.kts
 dependencies {
     implementation("com.github.YOUR_USERNAME:SKRETCH:0.1.0")
 }
 ```
 
-Tag a release on GitHub (for example `0.1.0`). JitPack builds from that tag using `jitpack.yml` (JDK 17).
+JitPack uses JDK 17 (`jitpack.yml`).
 
----
-
-## Public API
-
-### `ScratchCard`
-
-| Parameter | Default | Description |
-|-----------|---------|-------------|
-| `modifier` | `Modifier` | Size and layout of the card |
-| `revealThreshold` | `0.45f` | Fraction scratched before auto-reveal |
-| `brushWidth` | `52.dp` | Diameter of the scratch brush |
-| `cornerRadius` | `12.dp` | Card corner radius |
-| `enabled` | `true` | When false, gestures are ignored |
-| `onScratchStarted` | `{}` | First touch on the foil |
-| `onScratchProgress` | `{}` | Coverage updates; jumps to `1f` on reveal |
-| `onRevealed` | `{}` | Fired once when threshold is met |
-| `content` | required | Composable revealed under the foil |
-
-### `ScratchConstants`
-
-Default grid size, brush width, reveal threshold, fade duration, and foil label text.
-
-### `ScratchDefaults`
-
-Default foil palette and card chrome (elevation, border).
-
-### `ScratchState`
-
-Plain Kotlin state holder (usable if you build a custom overlay later). Tracks coverage, reveal status, and supports `reset()`.
-
----
-
-## How it works
-
-```
-┌─────────────────────────────┐
-│  ScratchCard                │
-│  ┌───────────────────────┐  │
-│  │  content()            │  │  ← reward / hidden UI
-│  └───────────────────────┘  │
-│  ┌───────────────────────┐  │
-│  │  foil bitmap overlay  │  │  ← silver texture, erased per touch
-│  └───────────────────────┘  │
-└─────────────────────────────┘
-```
-
-1. **Content layer** — your `content` composable is drawn first.
-2. **Foil bitmap** — a silver texture is rasterized once for the card size.
-3. **Erasure** — each drag stamps `PorterDuff.Mode.CLEAR` circles into the foil bitmap (`ScratchBitmapEraser`).
-4. **Coverage** — a 24×24 grid estimates how much area was scratched (`ScratchGrid`).
-5. **Reveal** — at the threshold, `scratchProgress` becomes `1f`, the foil fades out, and `onRevealed` runs.
-
-Gesture handling, haptics, and redraw invalidation live in `ScratchOverlay`. Logic stays in `ScratchState` for unit tests.
-
----
-
-## Project layout
-
-```
-SKRETCH/
-├── app/                    # MainActivity, NavGraph, theme, DI
-├── core/
-│   └── scratch/            # The scratch-card library
-├── feature-catalog/        # Demo screens (planned)
-├── gradle/
-│   └── libs.versions.toml
-└── docs/
-    └── ANDROID_CODING_GUIDELINES.md
-```
-
-### Package map (`com.example.skretch.scratch`)
-
-| Package | Contents |
-|---------|----------|
-| `component` | `ScratchCard`, `ScratchOverlay` |
-| `state` | `ScratchState`, `ScratchGrid`, `StrokeSegment` |
-| `design` | `ScratchDefaults`, `ScratchFoilDrawer` |
-| `util` | `ScratchBitmapEraser` |
-
-`:scratch` is the module consumers install. Everything else exists to develop and show it off.
-
-### Dependencies
-
-```
-app  →  feature-catalog + core:scratch
-feature-catalog  →  core:scratch only
-core:scratch  →  Compose + Material3 only
-```
-
-Features don't depend on each other or on `app`. `core:scratch` is a pure UI library: no ViewModel, no DI, no network.
-
----
-
-| Module | Status |
-|--------|--------|
-| `:app` | Done. Default Compose template for now. |
-| `:core:scratch` | Not started |
-| `:feature-catalog` | Not started |
-
-The library ships `consumer-rules.pro`. Apps that minify release builds pick it up automatically through:
+### Option B — Local module
 
 ```kotlin
-// scratch/build.gradle.kts
-defaultConfig {
-    consumerProguardFiles("consumer-rules.pro")
+// settings.gradle.kts
+include(":app", ":scratch")
+
+// app/build.gradle.kts
+dependencies {
+    implementation(project(":scratch"))
 }
 ```
 
-### Package layout for `core:scratch`
+---
+
+## Usage
+
+```kotlin
+import com.example.skretch.scratch.component.ScratchCard
+
+ScratchCard(
+    modifier = Modifier.size(width = 320.dp, height = 200.dp),
+    revealThreshold = 0.45f,   // auto-reveal after ~45% scratched
+    brushWidth = 52.dp,
+    onScratchStarted = { /* first touch */ },
+    onScratchProgress = { progress ->
+        // 0f .. 1f while scratching; jumps to 1f on full reveal
+    },
+    onRevealed = { /* threshold hit, foil fading out */ },
+) {
+    // Whatever you want hidden: text, image, Lottie, a whole layout
+    RewardContent()
+}
+```
+
+### Parameters
+
+| Parameter | Default | What it does |
+|-----------|---------|--------------|
+| `revealThreshold` | `0.45f` | How much of the card must be scratched before auto-reveal |
+| `brushWidth` | `52.dp` | Finger brush size |
+| `cornerRadius` | `12.dp` | Card corner radius |
+| `enabled` | `true` | Turn scratching on/off |
+| `onScratchStarted` | — | First drag on the foil |
+| `onScratchProgress` | — | Coverage updates |
+| `onRevealed` | — | Threshold reached |
+
+Other public types: `ScratchConstants`, `ScratchDefaults`, `ScratchState`.
+
+---
+
+## How scratching works
+
+Your content sits at the bottom. A silver foil bitmap is drawn on top. Each drag erases the foil in real time. A grid tracks how much area is cleared. Hit the threshold and the rest of the foil fades away.
+
+No per-pixel checks. No blocking the main thread with heavy redraws. Foil is rasterized once per card size, then only the erased regions update.
+
+---
+
+## Project structure
 
 ```
-com.example.skretch.core.scratch/
-├── component/     # ScratchCard, ScratchOverlay
-├── state/         # ScratchState, coverage tracker
-├── config/        # ScratchCardConfig, brush, threshold
-├── design/        # Tokens and presets
-└── util/          # Path builders, grid math
+SKRETCH/
+├── scratch/          # Library (publish this)
+├── app/              # Demo app
+├── docs/             # Coding guidelines
+└── gradle/           # Version catalog
 ```
 
-## Roadmap
+```
+com.example.skretch.scratch/
+├── component/        ScratchCard, ScratchOverlay
+├── state/            ScratchState, ScratchGrid
+├── design/           Foil colors, texture drawer
+└── util/             Bitmap eraser, haptics
+```
 
-### Phase 1: Foundation
-- [ ] Create `:core:scratch` library module
-- [ ] Register in `settings.gradle.kts`, wire up `app` dependency
-- [ ] `ScratchState` with grid-bucket coverage
-- [ ] Basic `ScratchCard` with default silver foil
-- [ ] Unit tests for `ScratchState`
-- [ ] Swap the `Greeting` placeholder in `MainActivity` for a scratch demo
-
-- Public types: `ScratchConstants`, `ScratchDefaults`, `ScratchFoilDrawer`, `ScratchState`, `StrokeSegment`
-- `ScratchCardKt` composable facade (Kotlin mangles the method name at compile time)
-
-Consumer apps should also apply the Compose compiler shrink rules (enabled by default with the Compose Gradle plugin).
+`:scratch` depends on Compose and Material 3 only. No DI, no networking, no ViewModels inside the library.
 
 ---
 
@@ -213,100 +141,45 @@ Consumer apps should also apply the Compose compiler shrink rules (enabled by de
 
 ```bash
 ./gradlew :scratch:test
-./gradlew test
-./gradlew connectedAndroidTest   # when a device/emulator is attached
 ```
-
-See [`docs/ANDROID_CODING_GUIDELINES.md`](docs/ANDROID_CODING_GUIDELINES.md) for the full list. The important bits:
-
-- No raw string literals. Use constants or `stringResource(R.string.*)`.
-- Screens split into `*ScreenRoot` (ViewModel, nav) and `*ScreenContent` (pure UI).
-- ViewModels use `StateFlow` and `handleAction`.
-- Dependency versions live in `gradle/libs.versions.toml`.
-- Koin in app/features only. Not in `core:scratch`.
-
-To continue with AI:
-
-> Follow `docs/ANDROID_CODING_GUIDELINES.md` in full. Use `README.md` for project scope and roadmap.
-
-## Tech stack
-
-| | |
-|---|---|
-| Language | Kotlin |
-| UI | Jetpack Compose + Material 3 |
-| Min SDK | 31 |
-| Compile / Target SDK | 37 |
-| JVM | 11 |
-| JDK (JitPack) | 17 |
-| Group / version | `com.github.YOUR_USERNAME` / `0.1.0` |
 
 ---
 
 ## Roadmap
 
-### Phase 1 — Foundation (done)
-- [x] `:scratch` library module with `maven-publish` and JitPack config
-- [x] `ScratchState` + grid coverage + unit tests
-- [x] `ScratchCard` with silver foil and reveal animation
-- [x] Demo app with scratch flow
+**Done**
+- Scratch card composable with silver foil
+- Bitmap erasure + coverage grid
+- Auto-reveal + fade animation
+- Haptics on first scratch
+- Unit tests
+- JitPack + ProGuard consumer rules
+- Demo app
 
-### Phase 2 — Customization
-- [ ] `ScratchCardConfig` and presets
-- [ ] Custom foil styles (bitmap texture, shimmer)
-- [ ] Brush and shape variants
-- [ ] Reveal animation options
-
-### Phase 3 — Polish
-- [x] Haptic feedback on scratch start
-- [x] Disable scratch when revealed or `enabled = false`
-- [ ] TalkBack / content descriptions
-- [ ] Optional progress persistence
-
-### Phase 4 — Showcase
-- [ ] `feature-catalog` module with preset gallery and playground
-
-### Phase 5 — Library hardening
-- [x] ProGuard consumer rules
-- [x] KDoc on public API
-- [ ] `@Stable` / `@Immutable` config types
-- [ ] License file before public release
+**Next**
+- `ScratchCardConfig` and style presets
+- Custom foil textures and shimmer
+- Brush / shape variants
+- Accessibility (TalkBack)
+- `feature-catalog` showcase module
+- License
 
 ---
 
-## Coding standards
+## For contributors
 
-See [`docs/ANDROID_CODING_GUIDELINES.md`](docs/ANDROID_CODING_GUIDELINES.md). Highlights:
+Read [`docs/ANDROID_CODING_GUIDELINES.md`](docs/ANDROID_CODING_GUIDELINES.md) before opening a PR. Match existing patterns in `:scratch`. Keep the library module free of app-level dependencies.
 
-- No raw string literals in UI; use `strings.xml` in apps and constants in the library.
-- Version catalogs in `gradle/libs.versions.toml`.
-- Keep `:scratch` free of app-level DI and networking.
+If you're continuing this project with AI assistance, this README plus the guidelines doc is enough context to pick up where things left off.
 
 ---
 
-## Continuing development (AI / contributors)
+## Tech
 
-1. Read this README for scope and current API.
-2. Read `docs/ANDROID_CODING_GUIDELINES.md` for conventions.
-3. Pick the next unchecked roadmap item.
-4. Keep diffs focused; match existing patterns in `:scratch`.
+Kotlin · Jetpack Compose · Material 3 · Min SDK 31 · JVM 11
 
 ---
-
-## References
-
-- [Now in Android](https://github.com/android/nowinandroid) (modular layout inspiration)
-- [Compose graphics modifiers](https://developer.android.com/develop/ui/compose/graphics/draw/modifiers)
-- [Android library ProGuard](https://developer.android.com/build/shrink-code#library-rules)
-
-1. Read this README for scope and roadmap
-2. Read `docs/ANDROID_CODING_GUIDELINES.md` for conventions
-3. Check the status table above and do the next unchecked item
-4. Keep diffs small, match existing patterns
-5. Don't add network or DI to `core:scratch`
-
-Next up: Phase 1. Create `:core:scratch`, build `ScratchState` and `ScratchCard`, wire a demo in `MainActivity`.
 
 ## License
 
-TBD. Add a license before the first public GitHub release.
+TBD.
