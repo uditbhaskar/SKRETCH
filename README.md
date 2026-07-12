@@ -4,6 +4,8 @@
 
 SKRETCH is a Jetpack Compose library for scratch cards. You drag across a metallic foil layer to reveal whatever is underneath: a reward, a coupon, an image, whatever you put there. Common pattern in promo and game UIs.
 
+**The thing we ship is the library module (`:scratch`).** The `app` module is just a demo. We'll publish the library on JitPack so other Android projects can add it as a dependency.
+
 This README is the main reference for what we're building and how the project is organized. Useful if you're picking the project back up, onboarding someone, or continuing with AI assistance.
 
 ## What we're building
@@ -36,9 +38,8 @@ We follow [`docs/ANDROID_CODING_GUIDELINES.md`](docs/ANDROID_CODING_GUIDELINES.m
 
 ```
 SKRETCH/
-├── app/                    # MainActivity, NavGraph, theme, DI
-├── core/
-│   └── scratch/            # The scratch-card library
+├── scratch/                # Publishable Android library (JitPack artifact)
+├── app/                    # Demo app only, not published
 ├── feature-catalog/        # Demo screens (planned)
 ├── gradle/
 │   └── libs.versions.toml
@@ -46,23 +47,25 @@ SKRETCH/
     └── ANDROID_CODING_GUIDELINES.md
 ```
 
+`:scratch` is the module consumers install. Everything else exists to develop and show it off.
+
 ### Dependencies
 
 ```
-app  →  feature-catalog + core:scratch
-feature-catalog  →  core:scratch only
-core:scratch  →  Compose + Material3 only
+app  →  feature-catalog + scratch
+feature-catalog  →  scratch only
+scratch  →  Compose + Material3 only
 ```
 
-Features don't depend on each other or on `app`. `core:scratch` is a pure UI library: no ViewModel, no DI, no network.
+Features don't depend on each other or on `app`. `scratch` is a pure UI library: no ViewModel, no DI, no network.
 
 ### Where things stand
 
-| Module | Status |
-|--------|--------|
-| `:app` | Done. Default Compose template for now. |
-| `:core:scratch` | Not started |
-| `:feature-catalog` | Not started |
+| Module | Status | Published? |
+|--------|--------|------------|
+| `:scratch` | Not started | Yes (JitPack) |
+| `:app` | Done. Default Compose template for now. | No |
+| `:feature-catalog` | Not started | No |
 
 ## Planned API
 
@@ -106,10 +109,10 @@ class ScratchState {
 }
 ```
 
-### Package layout for `core:scratch`
+### Package layout for `scratch`
 
 ```
-com.example.skretch.core.scratch/
+com.example.skretch.scratch/
 ├── component/     # ScratchCard, ScratchOverlay
 ├── state/         # ScratchState, coverage tracker
 ├── config/        # ScratchCardConfig, brush, threshold
@@ -120,8 +123,9 @@ com.example.skretch.core.scratch/
 ## Roadmap
 
 ### Phase 1: Foundation
-- [ ] Create `:core:scratch` library module
+- [ ] Create `:scratch` as an `com.android.library` module (JitPack-ready)
 - [ ] Register in `settings.gradle.kts`, wire up `app` dependency
+- [ ] Set `group`, `version`, and `maven-publish` config for JitPack
 - [ ] `ScratchState` with grid-bucket coverage
 - [ ] Basic `ScratchCard` with default silver foil
 - [ ] Unit tests for `ScratchState`
@@ -161,7 +165,40 @@ See [`docs/ANDROID_CODING_GUIDELINES.md`](docs/ANDROID_CODING_GUIDELINES.md) for
 - Screens split into `*ScreenRoot` (ViewModel, nav) and `*ScreenContent` (pure UI).
 - ViewModels use `StateFlow` and `handleAction`.
 - Dependency versions live in `gradle/libs.versions.toml`.
-- Koin in app/features only. Not in `core:scratch`.
+- Koin in app/features only. Not in `scratch`.
+
+## Publishing (JitPack)
+
+Only `:scratch` gets published. JitPack builds from Git tags on GitHub.
+
+**Planned coordinates** (update `com.example` / GitHub username before first release):
+
+```kotlin
+// settings.gradle.kts or scratch/build.gradle.kts
+group = "com.github.<your-github-username>"
+version = "1.0.0"
+```
+
+**Consumer dependency** (after first JitPack build):
+
+```kotlin
+repositories {
+    maven { url = uri("https://jitpack.io") }
+}
+
+dependencies {
+    implementation("com.github.<your-github-username>:SKRETCH:1.0.0")
+}
+```
+
+JitPack setup checklist (do before v1.0.0):
+- [ ] `:scratch` module with `com.android.library` plugin
+- [ ] `maven-publish` plugin on the library module
+- [ ] `jitpack.yml` if a custom JDK or build command is needed
+- [ ] GitHub release tag (e.g. `1.0.0`)
+- [ ] Public API surface documented (what composables/config types are stable)
+
+The demo `app` module is never published. It only proves the library works.
 
 To continue with AI:
 
@@ -209,9 +246,9 @@ Tests:
 2. Read `docs/ANDROID_CODING_GUIDELINES.md` for conventions
 3. Check the status table above and do the next unchecked item
 4. Keep diffs small, match existing patterns
-5. Don't add network or DI to `core:scratch`
+5. Don't add network or DI to `scratch`
 
-Next up: Phase 1. Create `:core:scratch`, build `ScratchState` and `ScratchCard`, wire a demo in `MainActivity`.
+Next up: Phase 1. Create `:scratch` as a publishable library module, build `ScratchState` and `ScratchCard`, wire a demo in `MainActivity`.
 
 ## License
 
