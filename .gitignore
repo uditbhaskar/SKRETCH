@@ -1,0 +1,88 @@
+# =============================================================================
+# SKRETCH — Android / Kotlin / Gradle
+# Keeps machine-specific, generated, and secret files out of version control.
+# =============================================================================
+
+# --- Gradle ---
+.gradle/
+**/build/
+!**/src/**/build/
+build/
+.gradle-home/
+
+# Gradle local config (machine-specific JVM paths, etc.)
+gradle.properties.local
+
+# --- Android Studio / IntelliJ IDEA ---
+*.iml
+.idea/
+
+# --- Local machine config (never commit) ---
+local.properties
+*.local
+
+# --- OS junk ---
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+
+# --- Android build / NDK ---
+.externalNativeBuild/
+.cxx/
+captures/
+*.apk
+*.aab
+*.ap_
+*.dex
+output.json
+*.hprof
+
+# --- Signing & secrets (never commit) ---
+*.jks
+*.keystore
+keystore.properties
+signing.properties
+secrets.properties
+google-services.json
+GoogleService-Info.plist
+.env
+.env.*
+!.env.example
+
+# --- Kotlin ---
+.kotlin/
+
+# --- Logs & temp ---
+*.log
+*.tmp
+*.swp
+*~
+
+# --- Test / coverage reports ---
+**/reports/
+**/test-results/
+**/androidTest-results/
+.jacoco/
+*.exec
+coverage/
+
+# --- Fastlane (if added later) ---
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/
+fastlane/test_output/
+
+# --- Cursor / AI local state (editor-specific, not part of the app) ---
+.cursor/
+
+# --- Misc tooling ---
+.navigation/
+lint/intermediates/
+lint/generated/
+lint/outputs/
+lint/tmp/
