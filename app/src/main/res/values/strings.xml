@@ -1,3 +1,23 @@
 <resources>
     <string name="app_name">SKRETCH</string>
+    <string name="demo_scratch_title">Reveal your reward</string>
+    <string name="demo_scratch_subtitle">Scratch the silver foil to see what you got.</string>
+    <string name="demo_scratch_progress">%1$d%% revealed</string>
+    <string name="demo_scratch_hint">Keep scratching until the card fully clears.</string>
+    <string name="demo_scratch_redo">Scratch again</string>
+    <string name="demo_prize_won_label">You won</string>
+    <string name="demo_prize_10">₹10</string>
+    <string name="demo_prize_10_subtitle">Credited to your account</string>
+    <string name="demo_prize_25">₹25</string>
+    <string name="demo_prize_25_subtitle">Added to your wallet</string>
+    <string name="demo_prize_50">₹50</string>
+    <string name="demo_prize_50_subtitle">Cashback unlocked</string>
+    <string name="demo_prize_100">₹100</string>
+    <string name="demo_prize_100_subtitle">Jackpot reward</string>
+    <string name="demo_prize_cashback">20% OFF</string>
+    <string name="demo_prize_cashback_subtitle">On your next order</string>
+    <string name="demo_prize_free_delivery">Free delivery</string>
+    <string name="demo_prize_free_delivery_subtitle">Valid for 7 days</string>
+    <string name="demo_better_luck">Better luck next time!</string>
+    <string name="demo_better_luck_subtitle">Come back and try another card.</string>
 </resources>

@@ -25,5 +25,5 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "SKRETCH"
-include(":app")
+include(":app", ":scratch")
  

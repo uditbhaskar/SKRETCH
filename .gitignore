@@ -1,46 +1,55 @@
 # =============================================================================
-# SKRETCH — Android / Kotlin / Gradle
-# Keeps machine-specific, generated, and secret files out of version control.
+# SKRETCH — Android / Kotlin / Gradle / Jetpack Compose
+# Machine-specific, generated, and secret files stay out of version control.
 # =============================================================================
 
 # --- Gradle ---
 .gradle/
+**/.gradle/
 **/build/
-!**/src/**/build/
 build/
 .gradle-home/
+gradle-app.setting
+!gradle-wrapper.jar
+!gradle/wrapper/gradle-wrapper.jar
 
-# Gradle local config (machine-specific JVM paths, etc.)
+# Local Gradle overrides (SDK paths, signing, secrets)
 gradle.properties.local
-
-# --- Android Studio / IntelliJ IDEA ---
-*.iml
-.idea/
-
-# --- Local machine config (never commit) ---
 local.properties
 *.local
 
-# --- OS junk ---
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
-Desktop.ini
+# --- Android Studio / IntelliJ IDEA ---
+*.iml
+*.ipr
+*.iws
+.idea/
+.idea_modules/
+out/
 
-# --- Android build / NDK ---
+# Android Studio captures & device screenshots
+captures/
+
+# --- Kotlin ---
+.kotlin/
+*.class
+
+# --- Android / NDK ---
 .externalNativeBuild/
 .cxx/
-captures/
 *.apk
 *.aab
 *.ap_
 *.dex
 output.json
 *.hprof
+bin/
+gen/
+
+# R8 / ProGuard outputs (generated on release builds)
+**/mapping.txt
+**/seeds.txt
+**/usage.txt
+**/configuration.txt
 
 # --- Signing & secrets (never commit) ---
 *.jks
@@ -54,22 +63,37 @@ GoogleService-Info.plist
 .env.*
 !.env.example
 
-# --- Kotlin ---
-.kotlin/
+# --- OS files ---
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+.AppleDouble
+.LSOverride
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+$RECYCLE.BIN/
 
 # --- Logs & temp ---
 *.log
 *.tmp
+*.temp
 *.swp
+*.swo
 *~
+*.orig
+*.rej
 
-# --- Test / coverage reports ---
+# --- Test & coverage reports ---
 **/reports/
 **/test-results/
 **/androidTest-results/
 .jacoco/
 *.exec
 coverage/
+htmlReport/
 
 # --- Fastlane (if added later) ---
 fastlane/report.xml
@@ -77,12 +101,17 @@ fastlane/Preview.html
 fastlane/screenshots/
 fastlane/test_output/
 
-# --- Cursor / AI local state (editor-specific, not part of the app) ---
+# --- Editor / tooling (not part of the app) ---
 .cursor/
-
-# --- Misc tooling ---
 .navigation/
+.fleet/
+
+# --- Android Lint intermediates ---
 lint/intermediates/
 lint/generated/
 lint/outputs/
 lint/tmp/
+
+# --- Misc ---
+*.salive
+dependency-graph/
