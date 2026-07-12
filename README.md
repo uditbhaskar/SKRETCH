@@ -10,14 +10,7 @@ This README is the project source of truth for scope, API, setup, and roadmap.
 
 ## Features
 
-- **Drag-to-scratch** foil overlay with a finger-sized circular brush
-- **Silver foil texture** rendered once per card size, then erased in real time
-- **Auto-reveal** when scratch coverage crosses a configurable threshold (default 45%)
-- **Callbacks** for scratch start, progress (0f–1f), and full reveal
-- **Haptic feedback** on first scratch
-- **Material 3** styling defaults (elevation, border, corner radius)
-- **Unit-tested** coverage tracking (`ScratchState`, `ScratchGrid`)
-- **ProGuard / R8** consumer rules included in the AAR
+This README is the main reference for what we're building and how the project is organized. Useful if you're picking the project back up, onboarding someone, or continuing with AI assistance.
 
 ---
 
@@ -140,13 +133,14 @@ Gesture handling, haptics, and redraw invalidation live in `ScratchOverlay`. Log
 
 ```
 SKRETCH/
-├── scratch/                 # Publishable Android library (JitPack)
-│   ├── consumer-rules.pro   # Merged into consumer release builds
-│   └── proguard-rules.pro   # Library release shrink rules
-├── app/                     # Demo app (not published)
-├── gradle/libs.versions.toml
-├── jitpack.yml
-└── docs/ANDROID_CODING_GUIDELINES.md
+├── app/                    # MainActivity, NavGraph, theme, DI
+├── core/
+│   └── scratch/            # The scratch-card library
+├── feature-catalog/        # Demo screens (planned)
+├── gradle/
+│   └── libs.versions.toml
+└── docs/
+    └── ANDROID_CODING_GUIDELINES.md
 ```
 
 ### Package map (`com.example.skretch.scratch`)
@@ -158,18 +152,25 @@ SKRETCH/
 | `design` | `ScratchDefaults`, `ScratchFoilDrawer` |
 | `util` | `ScratchBitmapEraser` |
 
+`:scratch` is the module consumers install. Everything else exists to develop and show it off.
+
 ### Dependencies
 
 ```
-app  →  scratch
-scratch  →  Compose UI + Material 3 only
+app  →  feature-catalog + core:scratch
+feature-catalog  →  core:scratch only
+core:scratch  →  Compose + Material3 only
 ```
 
-No ViewModel, DI, or network code in `:scratch`.
+Features don't depend on each other or on `app`. `core:scratch` is a pure UI library: no ViewModel, no DI, no network.
 
 ---
 
-## ProGuard / R8
+| Module | Status |
+|--------|--------|
+| `:app` | Done. Default Compose template for now. |
+| `:core:scratch` | Not started |
+| `:feature-catalog` | Not started |
 
 The library ships `consumer-rules.pro`. Apps that minify release builds pick it up automatically through:
 
@@ -180,7 +181,26 @@ defaultConfig {
 }
 ```
 
-**What is kept**
+### Package layout for `core:scratch`
+
+```
+com.example.skretch.core.scratch/
+├── component/     # ScratchCard, ScratchOverlay
+├── state/         # ScratchState, coverage tracker
+├── config/        # ScratchCardConfig, brush, threshold
+├── design/        # Tokens and presets
+└── util/          # Path builders, grid math
+```
+
+## Roadmap
+
+### Phase 1: Foundation
+- [ ] Create `:core:scratch` library module
+- [ ] Register in `settings.gradle.kts`, wire up `app` dependency
+- [ ] `ScratchState` with grid-bucket coverage
+- [ ] Basic `ScratchCard` with default silver foil
+- [ ] Unit tests for `ScratchState`
+- [ ] Swap the `Greeting` placeholder in `MainActivity` for a scratch demo
 
 - Public types: `ScratchConstants`, `ScratchDefaults`, `ScratchFoilDrawer`, `ScratchState`, `StrokeSegment`
 - `ScratchCardKt` composable facade (Kotlin mangles the method name at compile time)
@@ -197,7 +217,17 @@ Consumer apps should also apply the Compose compiler shrink rules (enabled by de
 ./gradlew connectedAndroidTest   # when a device/emulator is attached
 ```
 
----
+See [`docs/ANDROID_CODING_GUIDELINES.md`](docs/ANDROID_CODING_GUIDELINES.md) for the full list. The important bits:
+
+- No raw string literals. Use constants or `stringResource(R.string.*)`.
+- Screens split into `*ScreenRoot` (ViewModel, nav) and `*ScreenContent` (pure UI).
+- ViewModels use `StateFlow` and `handleAction`.
+- Dependency versions live in `gradle/libs.versions.toml`.
+- Koin in app/features only. Not in `core:scratch`.
+
+To continue with AI:
+
+> Follow `docs/ANDROID_CODING_GUIDELINES.md` in full. Use `README.md` for project scope and roadmap.
 
 ## Tech stack
 
@@ -269,7 +299,13 @@ See [`docs/ANDROID_CODING_GUIDELINES.md`](docs/ANDROID_CODING_GUIDELINES.md). Hi
 - [Compose graphics modifiers](https://developer.android.com/develop/ui/compose/graphics/draw/modifiers)
 - [Android library ProGuard](https://developer.android.com/build/shrink-code#library-rules)
 
----
+1. Read this README for scope and roadmap
+2. Read `docs/ANDROID_CODING_GUIDELINES.md` for conventions
+3. Check the status table above and do the next unchecked item
+4. Keep diffs small, match existing patterns
+5. Don't add network or DI to `core:scratch`
+
+Next up: Phase 1. Create `:core:scratch`, build `ScratchState` and `ScratchCard`, wire a demo in `MainActivity`.
 
 ## License
 
