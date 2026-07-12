@@ -1,82 +1,72 @@
 # SKRETCH
 
-> **GitHub description (short):** A Jetpack Compose scratch-card UI library — foil overlays, drag-to-reveal, and a design-system-style customization API. Built with modular Android architecture.
+**GitHub description:** Jetpack Compose scratch-card UI library with foil overlays, drag-to-reveal, and a customizable design system API. Modular Android project.
 
-SKRETCH is an Android project that provides **reusable scratch-card components** in Jetpack Compose. Users scratch a metallic foil layer to reveal hidden content underneath — a familiar pattern for rewards, coupons, games, and promotional UIs.
+SKRETCH is a Jetpack Compose library for scratch cards. You drag across a metallic foil layer to reveal whatever is underneath: a reward, a coupon, an image, whatever you put there. Common pattern in promo and game UIs.
 
-This README is the **source of truth for project intent and architecture**. Use it to resume development after context resets, onboard contributors, or guide AI-assisted implementation.
+This README is the main reference for what we're building and how the project is organized. Useful if you're picking the project back up, onboarding someone, or continuing with AI assistance.
 
----
+## What we're building
 
-## What We Are Building
+The goal is a real component library, not just a one-off demo.
 
-### Product
+- Drag to scratch off a foil overlay and reveal content below
+- Metallic foil, rounded cards, reveal animation
+- Customization through tokens, presets, and config objects (foil style, brush, shape, threshold, motion)
+- A small showcase app with a preset gallery and a playground to tweak options live
 
-A **Compose component library** (not just a demo app) with:
+### How it works under the hood
 
-- **Scratch interaction** — drag to erase a foil overlay and reveal content below
-- **Polished card visuals** — metallic foil, rounded corners, reveal animation
-- **Design-system customization** — tokens, presets, and config objects for foil, brush, shapes, thresholds, and motion
-- **Showcase app** — gallery and playground screens to preview presets and tweak options live
+Scratch cards in Compose need isolated blend modes:
 
-### Core Technical Approach
+1. Draw the hidden content (text, image, coupon, etc.)
+2. Draw a foil overlay on top
+3. Track the touch path and erase foil with `BlendMode.Clear`
+4. Wrap in `Modifier.graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }` so the clear blend doesn't punch through parent UI
+5. Track coverage with a grid bucket model (fast, no per-pixel checks)
+6. When coverage hits a threshold, fire the reveal callback and optionally animate the foil away
 
-Scratch cards in Compose rely on isolated blend modes:
-
-1. Draw hidden **content** (reward, coupon, image, text)
-2. Draw a **foil overlay** on top
-3. Track touch path and erase foil with `BlendMode.Clear`
-4. Use `Modifier.graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }` so clear blending does not punch through parent UI
-5. Track scratch **coverage** via a grid-bucket model (performant; no per-pixel alpha checks)
-6. When coverage crosses a **threshold**, trigger reveal callback and optional vanish animation
-
-**Logic lives in plain Kotlin** (`ScratchState`). **UI stays in composables** (`ScratchCard`, `ScratchOverlay`). This split keeps the library testable and keeps composables thin.
-
----
+Logic goes in plain Kotlin (`ScratchState`). UI goes in composables (`ScratchCard`, `ScratchOverlay`). Keeps things testable and composables thin.
 
 ## Architecture
 
-Follows project standards in [`docs/ANDROID_CODING_GUIDELINES.md`](docs/ANDROID_CODING_GUIDELINES.md), inspired by [Now in Android](https://github.com/android/nowinandroid) modularization and its `core:designsystem` pattern.
+We follow [`docs/ANDROID_CODING_GUIDELINES.md`](docs/ANDROID_CODING_GUIDELINES.md). Module layout is loosely based on [Now in Android](https://github.com/android/nowinandroid), especially the idea of putting shared UI in a `core` library.
 
-### Module Layout (Target)
+### Target module layout
 
 ```
 SKRETCH/
-├── app/                    # App shell: MainActivity, NavGraph, theme, DI entry
+├── app/                    # MainActivity, NavGraph, theme, DI
 ├── core/
-│   └── scratch/            # Scratch-card UI library (Android library module)
-├── feature-catalog/        # Demo: preset gallery + config playground (planned)
+│   └── scratch/            # The scratch-card library
+├── feature-catalog/        # Demo screens (planned)
 ├── gradle/
-│   └── libs.versions.toml  # Centralized dependency versions
+│   └── libs.versions.toml
 └── docs/
     └── ANDROID_CODING_GUIDELINES.md
 ```
 
-### Dependency Direction
+### Dependencies
 
 ```
 app  →  feature-catalog + core:scratch
 feature-catalog  →  core:scratch only
-core:scratch  →  Compose + Material3 only (no Koin, no network)
+core:scratch  →  Compose + Material3 only
 ```
 
-- Features **never** depend on each other
-- Features **never** depend on `app`
-- `core:scratch` is a **pure UI library** — no ViewModel, no DI inside the library
+Features don't depend on each other or on `app`. `core:scratch` is a pure UI library: no ViewModel, no DI, no network.
 
-### Current State
+### Where things stand
 
 | Module | Status |
 |--------|--------|
-| `:app` | Exists — default Compose template (`MainActivity`, `SKRETCHTheme`) |
-| `:core:scratch` | **Not created yet** |
-| `:feature-catalog` | **Not created yet** |
+| `:app` | Done. Default Compose template for now. |
+| `:core:scratch` | Not started |
+| `:feature-catalog` | Not started |
 
----
+## Planned API
 
-## Library API (Planned)
-
-### Public Composable
+### ScratchCard
 
 ```kotlin
 @Composable
@@ -86,37 +76,37 @@ fun ScratchCard(
     onScratchStarted: () -> Unit = {},
     onScratchProgress: (Float) -> Unit = {},
     onRevealed: () -> Unit = {},
-    content: @Composable () -> Unit,           // hidden reward
-    foilContent: (@Composable () -> Unit)? = null,  // optional custom foil
+    content: @Composable () -> Unit,
+    foilContent: (@Composable () -> Unit)? = null,
 )
 ```
 
-### Config & Design Tokens
+### Config and tokens
 
-| Type | Purpose |
-|------|---------|
-| `ScratchCardConfig` | Single customization entry point |
-| `ScratchFoilStyle` | Gradient, texture image, shimmer |
+| Type | What it does |
+|------|--------------|
+| `ScratchCardConfig` | Main entry point for customization |
+| `ScratchFoilStyle` | Gradient, texture, shimmer |
 | `ScratchBrushStyle` | Stroke width, cap, softness |
-| `ScratchColors` | Foil gradient stops, borders |
+| `ScratchColors` | Foil gradients, borders |
 | `ScratchShapes` | Corner radius, clip shapes |
 | `ScratchMotion` | Vanish duration, easing |
 | `ScratchPresets` | `Classic`, `Gold`, `Minimal`, etc. |
 
-### State (Internal / Testable)
+### ScratchState (internal, testable)
 
 ```kotlin
 class ScratchState {
     fun handleDragStart(offset: Offset)
     fun handleDrag(offset: Offset)
     fun handleDragEnd()
-    val scratchProgress: Float   // 0f .. 1f
+    val scratchProgress: Float   // 0f to 1f
     val isRevealed: Boolean
     fun reset()
 }
 ```
 
-### Package Structure (`core:scratch`)
+### Package layout for `core:scratch`
 
 ```
 com.example.skretch.core.scratch/
@@ -124,130 +114,105 @@ com.example.skretch.core.scratch/
 ├── state/         # ScratchState, coverage tracker
 ├── config/        # ScratchCardConfig, brush, threshold
 ├── design/        # Tokens and presets
-└── util/          # Path builders, grid bucket math
+└── util/          # Path builders, grid math
 ```
 
----
+## Roadmap
 
-## Implementation Roadmap
-
-Track progress by checking off phases below.
-
-### Phase 1 — Foundation
-- [ ] Create `:core:scratch` Android library module
-- [ ] Register in `settings.gradle.kts`; wire `app` dependency
-- [ ] Implement `ScratchState` with grid-bucket coverage
-- [ ] Implement basic `ScratchCard` with default silver foil
+### Phase 1: Foundation
+- [ ] Create `:core:scratch` library module
+- [ ] Register in `settings.gradle.kts`, wire up `app` dependency
+- [ ] `ScratchState` with grid-bucket coverage
+- [ ] Basic `ScratchCard` with default silver foil
 - [ ] Unit tests for `ScratchState`
-- [ ] Replace `Greeting` in `MainActivity` with a working scratch demo
+- [ ] Swap the `Greeting` placeholder in `MainActivity` for a scratch demo
 
-### Phase 2 — Design System & Customization
-- [ ] `ScratchCardConfig` + `ScratchPresets`
+### Phase 2: Customization
+- [ ] `ScratchCardConfig` and `ScratchPresets`
 - [ ] Foil variants: gradient, bitmap texture, shimmer
 - [ ] Brush variants: round, soft-edge
 - [ ] Custom clip shapes
 - [ ] Reveal animations: fade, scale, instant
-- [ ] `ScratchCardDefaults` (Material `Defaults` pattern)
+- [ ] `ScratchCardDefaults` (same idea as Material `Defaults`)
 
-### Phase 3 — Polish & Accessibility
+### Phase 3: Polish
 - [ ] Haptic feedback on scratch start
 - [ ] TalkBack / content descriptions
 - [ ] Disable scratch when revealed or `enabled = false`
 - [ ] Optional progress persistence (`ScratchStateSaver`)
 
-### Phase 4 — Showcase (`feature-catalog`)
-- [ ] Preset gallery screen
-- [ ] Live config playground (sliders for brush, threshold, foil)
+### Phase 4: Showcase
+- [ ] Preset gallery in `feature-catalog`
+- [ ] Live config playground (brush size, threshold, foil style)
 - [ ] `ScreenRoot` / `ScreenContent` split per guidelines
-- [ ] Compose UI tests for showcase screens
+- [ ] Compose UI tests
 
-### Phase 5 — Library Hardening
+### Phase 5: Library hardening
 - [ ] `@Stable` / `@Immutable` on public config types
 - [ ] ProGuard rules if needed
 - [ ] KDoc on public API
-- [ ] Consumer usage docs in this README
+- [ ] Usage docs in this README
 
----
+## Coding standards
 
-## Coding Standards
+See [`docs/ANDROID_CODING_GUIDELINES.md`](docs/ANDROID_CODING_GUIDELINES.md) for the full list. The important bits:
 
-All implementation must follow [`docs/ANDROID_CODING_GUIDELINES.md`](docs/ANDROID_CODING_GUIDELINES.md).
+- No raw string literals. Use constants or `stringResource(R.string.*)`.
+- Screens split into `*ScreenRoot` (ViewModel, nav) and `*ScreenContent` (pure UI).
+- ViewModels use `StateFlow` and `handleAction`.
+- Dependency versions live in `gradle/libs.versions.toml`.
+- Koin in app/features only. Not in `core:scratch`.
 
-Key rules:
-
-- **No raw string literals** — use constants or `stringResource(R.string.*)`
-- **Screen split** — `*ScreenRoot` (ViewModel, navigation) vs `*ScreenContent` (pure UI)
-- **ViewModel pattern** — `StateFlow`, `handleAction`, navigation flags
-- **Versions** — only in `gradle/libs.versions.toml`
-- **Dependency injection** — Koin in app/features; **not** in `core:scratch`
-
-When prompting AI to continue work:
+To continue with AI:
 
 > Follow `docs/ANDROID_CODING_GUIDELINES.md` in full. Use `README.md` for project scope and roadmap.
 
----
+## Tech stack
 
-## Tech Stack
-
-| Area | Choice |
-|------|--------|
+| | |
+|---|---|
 | Language | Kotlin |
 | UI | Jetpack Compose + Material 3 |
 | Min SDK | 31 |
-| Compile SDK | 36 |
+| Compile SDK | 37 |
 | JVM | 11 |
-| DI (app/features) | Koin (when modules are added) |
+| DI | Koin (when feature modules are added) |
 | Testing | JUnit, Compose UI Test |
 
----
+## Getting started
 
-## Getting Started
-
-### Prerequisites
-
-- Android Studio (latest stable recommended)
-- JDK 11+
-
-### Build & Run
+Needs Android Studio and JDK 11+.
 
 ```bash
 ./gradlew :app:assembleDebug
 ```
 
-Open the project in Android Studio and run the `app` configuration.
+Or open in Android Studio and run the `app` configuration.
 
-### Run Tests
+Tests:
 
 ```bash
 ./gradlew test
 ./gradlew connectedAndroidTest
 ```
 
----
+## References
 
-## Key References
-
-- [Now in Android](https://github.com/android/nowinandroid) — modular architecture reference
+- [Now in Android](https://github.com/android/nowinandroid)
 - [Android modularization guide](https://developer.android.com/topic/modularization)
-- [Compose graphics modifiers](https://developer.android.com/develop/ui/compose/graphics/draw/modifiers) — `graphicsLayer`, `CompositingStrategy.Offscreen`, blend modes
+- [Compose graphics modifiers](https://developer.android.com/develop/ui/compose/graphics/draw/modifiers)
 - [Project coding guidelines](docs/ANDROID_CODING_GUIDELINES.md)
 
----
+## Picking up where you left off
 
-## AI Continuation Notes
+1. Read this README for scope and roadmap
+2. Read `docs/ANDROID_CODING_GUIDELINES.md` for conventions
+3. Check the status table above and do the next unchecked item
+4. Keep diffs small, match existing patterns
+5. Don't add network or DI to `core:scratch`
 
-When resuming work on this repo:
-
-1. Read this `README.md` for scope, module plan, and roadmap checkboxes
-2. Read `docs/ANDROID_CODING_GUIDELINES.md` for file layout and conventions
-3. Check **Current State** table above — implement the next unchecked roadmap item
-4. Prefer minimal, focused diffs; match existing naming and patterns
-5. Do not add network/DI to `core:scratch` — it stays a pure UI library
-
-**Next recommended step:** Phase 1 — create `:core:scratch`, implement `ScratchState` + `ScratchCard`, wire a demo in `MainActivity`.
-
----
+Next up: Phase 1. Create `:core:scratch`, build `ScratchState` and `ScratchCard`, wire a demo in `MainActivity`.
 
 ## License
 
-TBD — add a license before public release if sharing on GitHub.
+TBD. Add one before a public GitHub release.
