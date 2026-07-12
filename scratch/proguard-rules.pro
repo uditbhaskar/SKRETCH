@@ -6,4 +6,4 @@
 -keepattributes *Annotation*,Signature,InnerClasses,EnclosingMethod
 -renamesourcefileattribute SourceFile
 
--dontwarn com.example.skretch.scratch.**
+-dontwarn com.skretch.scratch.**

@@ -74,7 +74,7 @@ dependencies {
 ## Usage
 
 ```kotlin
-import com.example.skretch.scratch.component.ScratchCard
+import com.skretch.scratch.component.ScratchCard
 
 ScratchCard(
     modifier = Modifier.size(width = 320.dp, height = 200.dp),
@@ -126,7 +126,7 @@ SKRETCH/
 ```
 
 ```
-com.example.skretch.scratch/
+com.skretch.scratch/
 ├── component/        ScratchCard, ScratchOverlay
 ├── state/            ScratchState, ScratchGrid
 ├── design/           Foil colors, texture drawer

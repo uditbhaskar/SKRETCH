@@ -4,13 +4,13 @@ plugins {
 }
 
 android {
-    namespace = "com.example.skretch"
+    namespace = "com.skretch"
     compileSdk {
         version = release(37)
     }
 
     defaultConfig {
-        applicationId = "com.example.skretch"
+        applicationId = "com.skretch"
         minSdk {
             version = release(31)
         }

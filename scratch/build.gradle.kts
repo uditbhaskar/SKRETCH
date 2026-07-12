@@ -8,7 +8,7 @@ group = "com.github.YOUR_USERNAME"
 version = "0.1.0"
 
 android {
-    namespace = "com.example.skretch.scratch"
+    namespace = "com.skretch.scratch"
     compileSdk {
         version = release(37)
     }
