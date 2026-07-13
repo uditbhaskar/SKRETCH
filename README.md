@@ -170,7 +170,7 @@ com.skretch.scratch/
 
 Read [`docs/ANDROID_CODING_GUIDELINES.md`](docs/ANDROID_CODING_GUIDELINES.md) before opening a PR. Match existing patterns in `:scratch`. Keep the library module free of app-level dependencies.
 
-If you're continuing this project with AI assistance, this README plus the guidelines doc is enough context to pick up where things left off.
+If you're continuing this project, this README plus the guidelines doc is enough context to pick up where things left off.
 
 ---
 
