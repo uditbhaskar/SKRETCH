@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
@@ -29,9 +30,10 @@ import com.skretch.scratch.util.ScratchHaptics
 
 /**
  * Renders the foil layer, plays first-scratch haptics, and wires drag gestures to [state].
+ * Brush width is converted once per frame and synced to [state] so coverage and erasure use [ScratchState.brushRadiusPx].
  *
  * @param state scratch state for this card
- * @param brushWidth width of the scratch stroke
+ * @param brushWidth brush diameter; converted to pixels and synced to [state] for matching foil erasure
  * @param enabled when false, scratch gestures are ignored
  * @param onScratchStarted called the first time the user starts scratching
  * @param onScratchProgress called when scratch coverage changes; reports `1f` after auto-reveal
@@ -56,7 +58,10 @@ internal fun ScratchOverlay(
     val hapticFeedback = LocalHapticFeedback.current
     val view = LocalView.current
     val brushWidthPx = with(density) { brushWidth.toPx() }
-    val brushRadiusPx = maxOf(brushWidthPx * 0.5f, 1f)
+    SideEffect {
+        state.updateBrushWidthPx(brushWidthPx)
+    }
+    val brushRadiusPx = state.brushRadiusPx
     val isRevealed = state.isRevealed
     val scratchProgress = state.scratchProgress
     val layerSize = state.layerSize
@@ -80,10 +85,6 @@ internal fun ScratchOverlay(
         } else {
             null
         }
-    }
-
-    LaunchedEffect(brushWidthPx) {
-        state.updateBrushWidthPx(brushWidthPx)
     }
 
     LaunchedEffect(enabled) {

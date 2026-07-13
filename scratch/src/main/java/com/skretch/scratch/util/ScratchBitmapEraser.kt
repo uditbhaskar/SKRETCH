@@ -25,7 +25,7 @@ internal object ScratchBitmapEraser {
      *
      * @param bitmap mutable foil overlay bitmap
      * @param center stamp center in layer coordinates
-     * @param radius brush radius in pixels
+     * @param radius brush radius in pixels from [com.skretch.scratch.util.ScratchBrushMetrics]
      * @author udit
      */
     fun eraseCircle(bitmap: ImageBitmap, center: Offset, radius: Float) {
@@ -40,7 +40,7 @@ internal object ScratchBitmapEraser {
      * @param bitmap mutable foil overlay bitmap
      * @param from previous touch position in layer coordinates
      * @param to current touch position in layer coordinates
-     * @param radius brush radius in pixels
+     * @param radius brush radius in pixels from [com.skretch.scratch.util.ScratchBrushMetrics]
      * @author udit
      */
     fun eraseStroke(bitmap: ImageBitmap, from: Offset, to: Offset, radius: Float) {

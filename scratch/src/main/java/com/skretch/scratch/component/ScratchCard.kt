@@ -21,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -36,7 +37,7 @@ import com.skretch.scratch.state.ScratchState
  *
  * @param modifier modifier applied to this card
  * @param revealThreshold fraction of the card that must be scratched before reveal, between 0 and 1
- * @param brushWidth width of the scratch stroke
+ * @param brushWidth brush diameter; grid coverage and foil erasure share the same pixel radius
  * @param cornerRadius corner radius of the card
  * @param enabled when false, scratch gestures are ignored
  * @param onScratchStarted called the first time the user starts scratching
@@ -50,14 +51,22 @@ fun ScratchCard(
     modifier: Modifier = Modifier,
     revealThreshold: Float = ScratchConstants.DEFAULT_REVEAL_THRESHOLD,
     brushWidth: Dp = ScratchConstants.DEFAULT_BRUSH_WIDTH_DP.dp,
-    cornerRadius: Dp = 12.dp,
+    cornerRadius: Dp = ScratchConstants.DEFAULT_CORNER_RADIUS.dp,
     enabled: Boolean = true,
     onScratchStarted: () -> Unit = {},
     onScratchProgress: (Float) -> Unit = {},
     onRevealed: () -> Unit = {},
     content: @Composable () -> Unit,
 ) {
-    val scratchState = remember { ScratchState(initialRevealThreshold = revealThreshold) }
+
+    val density = LocalDensity.current
+    val brushWidthPx = with(density) { brushWidth.toPx() }
+    val scratchState = remember {
+        ScratchState(
+            initialRevealThreshold = revealThreshold,
+            initialBrushWidthPx = brushWidthPx,
+        )
+    }
     val cardShape = RoundedCornerShape(cornerRadius)
 
     LaunchedEffect(revealThreshold) {

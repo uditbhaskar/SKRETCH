@@ -8,6 +8,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.unit.IntSize
 import com.skretch.scratch.ScratchConstants
+import com.skretch.scratch.util.ScratchBrushMetrics
 
 /**
  * Tracks scratch gestures, coverage, and reveal status for a single card.
@@ -16,7 +17,7 @@ import com.skretch.scratch.ScratchConstants
  * [scratchProgress] reaches the configured reveal threshold, then [scratchProgress] is set to `1f`.
  *
  * @param initialRevealThreshold fraction of the card that must be scratched before reveal
- * @param initialBrushWidthPx brush width in pixels used for coverage tracking
+ * @param initialBrushWidthPx brush width in pixels; must stay in sync with foil erasure in [com.skretch.scratch.component.ScratchOverlay]
  * @author udit
  */
 class ScratchState(
@@ -62,14 +63,22 @@ class ScratchState(
     }
 
     /**
-     * Updates the brush width used for coverage tracking.
+     * Updates the brush width shared by grid coverage and foil erasure.
      *
-     * @param widthPx brush width in pixels
+     * @param widthPx brush diameter in pixels
      * @author udit
      */
     fun updateBrushWidthPx(widthPx: Float) {
         brushWidthPx = widthPx.coerceAtLeast(0f)
     }
+
+    /**
+     * Brush radius in pixels derived from the current brush width.
+     *
+     * @author udit
+     */
+    val brushRadiusPx: Float
+        get() = ScratchBrushMetrics.radiusFromWidthPx(brushWidthPx)
 
     /**
      * Enables or disables scratch interaction.
@@ -154,29 +163,13 @@ class ScratchState(
     }
 
     /**
-     * Returns half of the current brush width in pixels, with a minimum of 1px.
-     *
-     * @return brush radius in pixels
-     * @author udit
-     */
-    private fun brushRadius(): Float = maxOf(brushWidthPx * 0.5f, 1f)
-
-    /**
-     * Whether a new scratch gesture should be processed.
-     *
-     * @return true when scratching is enabled, the card is not yet revealed, and the layer has a valid size
-     * @author udit
-     */
-    private fun canScratch(): Boolean = scratchEnabled && !isRevealed && layerSize.width > 0 && layerSize.height > 0
-
-    /**
      * Stamps the brush at a single point and refreshes scratch progress.
      *
      * @param offset touch position in layer coordinates
      * @author udit
      */
     private fun stampAt(offset: Offset) {
-        grid.stampBrush(center = offset, brushRadius = brushRadius())
+        grid.stampBrush(center = offset, brushRadius = brushRadiusPx)
         syncProgress()
     }
 
@@ -188,7 +181,7 @@ class ScratchState(
      * @author udit
      */
     private fun interpolateStamps(from: Offset, to: Offset) {
-        val radius = brushRadius()
+        val radius = brushRadiusPx
         val distance = (to - from).getDistance()
         if (distance <= 0f) {
             stampAt(to)
@@ -209,6 +202,14 @@ class ScratchState(
         grid.stampBrush(center = to, brushRadius = radius)
         syncProgress()
     }
+
+    /**
+     * Whether a new scratch gesture should be processed.
+     *
+     * @return true when scratching is enabled, the card is not yet revealed, and the layer has a valid size
+     * @author udit
+     */
+    private fun canScratch(): Boolean = scratchEnabled && !isRevealed && layerSize.width > 0 && layerSize.height > 0
 
     /**
      * Copies grid coverage into [scratchProgress] and checks whether the reveal threshold was reached.
