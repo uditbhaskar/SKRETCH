@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "com.github.uditbhaskar"
-version = "0.1.2"
+version = "0.1.3"
 
 android {
     namespace = "com.skretch.scratch"
@@ -97,4 +97,10 @@ afterEvaluate {
             }
         }
     }
+}
+
+// JitPack rewrites *.module and points sources at SKRETCH-x.y.z.jar (404).
+// Disable module metadata so Gradle uses Maven layout and fetches *-sources.jar.
+tasks.withType<GenerateModuleMetadata>().configureEach {
+    enabled = false
 }
