@@ -76,6 +76,8 @@ If you don't pass a brush width, it defaults to 52dp (`ScratchConstants.DEFAULT_
 
 ## Demo
 
+![SKRETCH demo](docs/media/DEMO_SKRETCH.mp4)
+
 Run the `:app` module to try patterns, brushes, shapes, and presets. Presets live on their own screen.
 
 ```bash
