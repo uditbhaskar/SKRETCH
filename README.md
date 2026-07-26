@@ -10,7 +10,7 @@ By [uditbhaskar](https://github.com/uditbhaskar).
 
 ```kotlin
 maven { url = uri("https://jitpack.io") }
-implementation("com.github.uditbhaskar.SKRETCH:scratch:0.1.0")
+implementation("com.github.uditbhaskar:SKRETCH:0.1.0")
 ```
 
 In a multi-module project you can also use `implementation(projects.scratch)`.
