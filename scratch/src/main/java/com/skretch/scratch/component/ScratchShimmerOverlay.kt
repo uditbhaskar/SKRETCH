@@ -20,7 +20,7 @@ import androidx.compose.ui.graphics.Color
  *
  * @param visible when false, nothing is drawn
  * @param modifier layout modifier
- * @author udit
+ * @author uditbhaskar
  */
 @Composable
 internal fun ScratchShimmerOverlay(

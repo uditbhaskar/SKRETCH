@@ -11,7 +11,7 @@ import kotlin.math.min
  *
  * @param columns number of horizontal buckets
  * @param rows number of vertical buckets
- * @author udit
+ * @author uditbhaskar
  */
 internal class ScratchGrid(
     private val columns: Int = ScratchConstants.GRID_COLUMNS,
@@ -41,7 +41,7 @@ internal class ScratchGrid(
      *
      * @param width layer width in pixels
      * @param height layer height in pixels
-     * @author udit
+     * @author uditbhaskar
      */
     fun resize(width: Float, height: Float) {
         if (width <= 0f || height <= 0f) {
@@ -65,7 +65,7 @@ internal class ScratchGrid(
      *
      * @param center brush center in layer coordinates
      * @param brushRadius brush radius in pixels
-     * @author udit
+     * @author uditbhaskar
      */
     fun stampBrush(center: Offset, brushRadius: Float) {
         if (layerWidth <= 0f || layerHeight <= 0f) return
@@ -95,7 +95,7 @@ internal class ScratchGrid(
     /**
      * Clears all scratched cells without changing the grid dimensions.
      *
-     * @author udit
+     * @author uditbhaskar
      */
     fun reset() {
         if (scratchedCells.isEmpty()) return
@@ -106,7 +106,7 @@ internal class ScratchGrid(
      * Copies scratched cell flags for persistence.
      *
      * @return snapshot of scratched cells, or empty when uninitialized
-     * @author udit
+     * @author uditbhaskar
      */
     fun snapshotCells(): BooleanArray = scratchedCells.copyOf()
 
@@ -114,7 +114,7 @@ internal class ScratchGrid(
      * Restores scratched cell flags from [cells] when sizes match.
      *
      * @param cells previously captured scratched flags
-     * @author udit
+     * @author uditbhaskar
      */
     fun restoreCells(cells: BooleanArray) {
         if (scratchedCells.size != cells.size) return
@@ -127,7 +127,7 @@ internal class ScratchGrid(
      * Used to rebuild foil holes after process death / configuration changes.
      *
      * @param action receives cell center in pixels
-     * @author udit
+     * @author uditbhaskar
      */
     fun forEachScratchedCellCenter(action: (Offset) -> Unit) {
         if (layerWidth <= 0f || layerHeight <= 0f || scratchedCells.isEmpty()) return
@@ -149,7 +149,7 @@ internal class ScratchGrid(
     /**
      * Approximate brush radius that covers one grid cell when replaying saved coverage.
      *
-     * @author udit
+     * @author uditbhaskar
      */
     fun cellStampRadius(): Float {
         if (layerWidth <= 0f || layerHeight <= 0f) return 1f

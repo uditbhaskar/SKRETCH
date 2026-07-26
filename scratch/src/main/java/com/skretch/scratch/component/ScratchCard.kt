@@ -63,7 +63,7 @@ import com.skretch.scratch.state.rememberScratchState
  * @param onScratchStarted called the first time the user starts scratching
  * @param onScratchProgress called when scratch coverage changes; reports `1f` after reveal
  * @param onRevealed called once when the card reveals
- * @author udit
+ * @author uditbhaskar
  */
 @Composable
 fun ScratchCard(
@@ -149,7 +149,7 @@ fun ScratchCard(
  * @param onScratchStarted called the first time the user starts scratching
  * @param onScratchProgress called when scratch coverage changes
  * @param onRevealed called once when the card reveals
- * @author udit
+ * @author uditbhaskar
  */
 @Composable
 fun ScratchCard(
@@ -188,7 +188,7 @@ fun ScratchCard(
 /**
  * Convenience overload that keeps a trailing [content] lambda for the main layer.
  *
- * @author udit
+ * @author uditbhaskar
  */
 @Composable
 fun ScratchCard(

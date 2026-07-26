@@ -7,7 +7,7 @@ import androidx.compose.ui.unit.dp
 /**
  * One-line presets that fill both layers and brush for common product looks.
  *
- * @author udit
+ * @author uditbhaskar
  */
 object ScratchPresets {
 
@@ -16,7 +16,7 @@ object ScratchPresets {
      *
      * @param rewardTitle main-layer title
      * @param rewardSubtitle optional main-layer subtitle
-     * @author udit
+     * @author uditbhaskar
      */
     fun promo(
         rewardTitle: String = "You won!",
@@ -39,7 +39,7 @@ object ScratchPresets {
      *
      * @param rewardTitle main-layer title
      * @param rewardSubtitle optional main-layer subtitle
-     * @author udit
+     * @author uditbhaskar
      */
     fun wallet(
         rewardTitle: String = "₹50",
@@ -73,7 +73,7 @@ object ScratchPresets {
      *
      * @param rewardTitle main-layer title
      * @param rewardSubtitle optional main-layer subtitle
-     * @author udit
+     * @author uditbhaskar
      */
     fun game(
         rewardTitle: String = "Bonus unlocked",
@@ -104,7 +104,7 @@ object ScratchPresets {
      *
      * @param rewardTitle main-layer title
      * @param rewardSubtitle optional main-layer subtitle
-     * @author udit
+     * @author uditbhaskar
      */
     fun matte(
         rewardTitle: String = "Offer inside",
@@ -134,7 +134,7 @@ object ScratchPresets {
      *
      * @param rewardTitle main-layer title
      * @param rewardSubtitle optional main-layer subtitle
-     * @author udit
+     * @author uditbhaskar
      */
     fun party(
         rewardTitle: String = "Surprise!",
@@ -165,7 +165,7 @@ object ScratchPresets {
      *
      * @param rewardTitle main-layer title
      * @param rewardSubtitle optional main-layer subtitle
-     * @author udit
+     * @author uditbhaskar
      */
     fun minimal(
         rewardTitle: String = "Revealed",
@@ -207,7 +207,7 @@ object ScratchPresets {
  * @param revealAnimation how the cover disappears
  * @param hapticIntensity first-scratch haptic strength
  * @param autoReveal when false, call [com.skretch.scratch.state.ScratchState.reveal] yourself
- * @author udit
+ * @author uditbhaskar
  */
 @Immutable
 data class ScratchCardPreset(

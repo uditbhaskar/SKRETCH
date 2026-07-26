@@ -11,7 +11,7 @@ import com.skretch.scratch.ScratchConstants
  * @param text label content
  * @param color text color
  * @param fontSize text size; [TextUnit.Unspecified] lets the drawer pick a size from the layer width
- * @author udit
+ * @author uditbhaskar
  */
 @Immutable
 data class ScratchSurfaceText(
@@ -30,7 +30,7 @@ data class ScratchSurfaceText(
 /**
  * Built-in cover textures for the scratch layer.
  *
- * @author udit
+ * @author uditbhaskar
  */
 enum class ScratchCoverPattern {
     /** Cool metallic silver foil. */
@@ -52,7 +52,7 @@ enum class ScratchCoverPattern {
 /**
  * Brush style used when erasing the scratch layer.
  *
- * @author udit
+ * @author uditbhaskar
  */
 enum class ScratchBrushStyle {
     /** Hard round stamp. */

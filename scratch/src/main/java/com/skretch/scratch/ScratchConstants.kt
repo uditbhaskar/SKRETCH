@@ -3,7 +3,7 @@ package com.skretch.scratch
 /**
  * Library-wide defaults for scratch coverage, brush size, foil rendering, and reveal animation.
  *
- * @author udit
+ * @author uditbhaskar
  */
 object ScratchConstants {
     /** Horizontal buckets for coverage estimation. */

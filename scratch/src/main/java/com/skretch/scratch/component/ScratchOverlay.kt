@@ -69,7 +69,7 @@ import com.skretch.scratch.util.ScratchHaptics
  * @param onScratchProgress called when coverage changes
  * @param onRevealed called once when the card reveals
  * @param modifier layout modifier
- * @author udit
+ * @author uditbhaskar
  */
 @Composable
 internal fun ScratchOverlay(

@@ -17,7 +17,7 @@ import kotlin.random.Random
 /**
  * Erases brush stamps from a foil or mask [ImageBitmap] using clear compositing.
  *
- * @author udit
+ * @author uditbhaskar
  */
 internal object ScratchBitmapEraser {
 
@@ -33,7 +33,7 @@ internal object ScratchBitmapEraser {
      * @param radius brush radius in pixels from [ScratchBrushMetrics]
      * @param style circular, smooth, or hairy stamp
      * @param hardness edge firmness from `0f` to `1f`; mainly affects smooth / hairy stamps
-     * @author udit
+     * @author uditbhaskar
      */
     fun eraseStamp(
         bitmap: ImageBitmap,
@@ -60,7 +60,7 @@ internal object ScratchBitmapEraser {
      * @param radius brush radius in pixels from [ScratchBrushMetrics]
      * @param style circular, smooth, or hairy stamp
      * @param hardness edge firmness from `0f` to `1f`
-     * @author udit
+     * @author uditbhaskar
      */
     fun eraseStroke(
         bitmap: ImageBitmap,
@@ -97,7 +97,7 @@ internal object ScratchBitmapEraser {
      * @param bitmap mutable foil or mask bitmap
      * @param center stamp center in layer coordinates
      * @param radius brush radius in pixels
-     * @author udit
+     * @author uditbhaskar
      */
     fun eraseCircle(bitmap: ImageBitmap, center: Offset, radius: Float) {
         if (radius <= 0f) return

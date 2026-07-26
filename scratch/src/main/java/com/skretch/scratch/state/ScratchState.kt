@@ -27,7 +27,7 @@ import com.skretch.scratch.config.ScratchBrushStyle
  * @param initialRevealThreshold fraction of the card that must be scratched before reveal
  * @param initialBrushWidthPx brush width in pixels; must stay in sync with foil erasure
  * @param autoReveal when false, threshold does not auto-reveal; call [reveal] manually
- * @author udit
+ * @author uditbhaskar
  */
 class ScratchState(
     initialRevealThreshold: Float = ScratchConstants.DEFAULT_REVEAL_THRESHOLD,
@@ -61,7 +61,7 @@ class ScratchState(
     /**
      * Increments when [reset] is called so the foil bitmap can be recreated.
      *
-     * @author udit
+     * @author uditbhaskar
      */
     var resetGeneration by mutableIntStateOf(0)
         private set
@@ -72,7 +72,7 @@ class ScratchState(
      * Updates how much of the card must be scratched before it is revealed.
      *
      * @param threshold fraction between 0 and 1, or a [RevealThreshold]
-     * @author udit
+     * @author uditbhaskar
      */
     fun updateRevealThreshold(threshold: Float) {
         revealThreshold = threshold.coerceIn(0f, 1f)
@@ -83,7 +83,7 @@ class ScratchState(
      * Updates the reveal threshold from a typed [RevealThreshold].
      *
      * @param threshold typed coverage threshold
-     * @author udit
+     * @author uditbhaskar
      */
     fun updateRevealThreshold(threshold: RevealThreshold) {
         updateRevealThreshold(threshold.fraction)
@@ -93,7 +93,7 @@ class ScratchState(
      * Enables or disables automatic reveal when coverage crosses the threshold.
      *
      * @param enabled when false, call [reveal] after your own gate (e.g. server confirm)
-     * @author udit
+     * @author uditbhaskar
      */
     fun updateAutoReveal(enabled: Boolean) {
         autoRevealEnabled = enabled
@@ -104,7 +104,7 @@ class ScratchState(
      * Updates the brush width shared by grid coverage and foil erasure.
      *
      * @param widthPx brush diameter in pixels
-     * @author udit
+     * @author uditbhaskar
      */
     fun updateBrushWidthPx(widthPx: Float) {
         val coerced = widthPx.coerceAtLeast(0f)
@@ -118,7 +118,7 @@ class ScratchState(
      *
      * @param style active brush style
      * @param hardness active brush hardness `0f..1f`
-     * @author udit
+     * @author uditbhaskar
      */
     fun updateBrushStyle(style: ScratchBrushStyle, hardness: Float = 1f) {
         brushStyle = style
@@ -128,7 +128,7 @@ class ScratchState(
     /**
      * Brush radius in pixels derived from the current brush width.
      *
-     * @author udit
+     * @author uditbhaskar
      */
     val brushRadiusPx: Float
         get() = ScratchBrushMetrics.radiusFromWidthPx(brushWidthPx)
@@ -137,7 +137,7 @@ class ScratchState(
      * Enables or disables scratch interaction.
      *
      * @param value when false, drag gestures are ignored
-     * @author udit
+     * @author uditbhaskar
      */
     fun updateScratchEnabled(value: Boolean) {
         scratchEnabled = value
@@ -147,7 +147,7 @@ class ScratchState(
      * Updates the scratch layer size and rebuilds the coverage grid.
      *
      * @param size layer size in pixels from layout
-     * @author udit
+     * @author uditbhaskar
      */
     fun updateLayerSize(size: IntSize) {
         if (layerSize == size) return
@@ -161,7 +161,7 @@ class ScratchState(
      *
      * @param offset touch position in layer coordinates
      * @return the stamped position when scratching is active
-     * @author udit
+     * @author uditbhaskar
      */
     fun handleDragStart(offset: Offset): Offset? {
         if (!canScratch()) return null
@@ -176,7 +176,7 @@ class ScratchState(
      *
      * @param offset current touch position in layer coordinates
      * @return the stroke segment to erase, or null when scratching is inactive
-     * @author udit
+     * @author uditbhaskar
      */
     fun handleDrag(offset: Offset): StrokeSegment? {
         if (!canScratch()) return null
@@ -195,7 +195,7 @@ class ScratchState(
     /**
      * Called when a scratch drag ends or is canceled.
      *
-     * @author udit
+     * @author uditbhaskar
      */
     fun handleDragEnd() {
         lastDragPoint = null
@@ -204,7 +204,7 @@ class ScratchState(
     /**
      * Forces the card into the revealed state and sets progress to `1f`.
      *
-     * @author udit
+     * @author uditbhaskar
      */
     fun reveal() {
         if (isRevealed) return
@@ -216,7 +216,7 @@ class ScratchState(
     /**
      * Clears scratch progress, reveal state, and increments [resetGeneration] so the foil bitmap is recreated.
      *
-     * @author udit
+     * @author uditbhaskar
      */
     fun reset() {
         lastDragPoint = null
@@ -231,7 +231,7 @@ class ScratchState(
      * Captures coverage and reveal flags for process death / configuration changes.
      *
      * @return immutable snapshot of this state
-     * @author udit
+     * @author uditbhaskar
      */
     fun snapshot(): ScratchStateSnapshot = ScratchStateSnapshot(
         layerWidth = layerSize.width,
@@ -253,7 +253,7 @@ class ScratchState(
      * Recreates the foil via [resetGeneration] so the visual mask can be rebuilt by the caller.
      *
      * @param snapshot previously captured state
-     * @author udit
+     * @author uditbhaskar
      */
     fun restore(snapshot: ScratchStateSnapshot) {
         lastDragPoint = null
@@ -285,7 +285,7 @@ class ScratchState(
      * @param radius brush radius used for each cell stamp
      * @param style brush style used when the holes were scratched
      * @param hardness brush hardness used when the holes were scratched
-     * @author udit
+     * @author uditbhaskar
      */
     fun paintCoverageOnto(
         bitmap: ImageBitmap,
@@ -310,7 +310,7 @@ class ScratchState(
      * Stamps the brush at a single point and refreshes scratch progress.
      *
      * @param offset touch position in layer coordinates
-     * @author udit
+     * @author uditbhaskar
      */
     private fun stampAt(offset: Offset) {
         grid.stampBrush(center = offset, brushRadius = brushRadiusPx)
@@ -322,7 +322,7 @@ class ScratchState(
      *
      * @param from previous drag position in layer coordinates
      * @param to current drag position in layer coordinates
-     * @author udit
+     * @author uditbhaskar
      */
     private fun interpolateStamps(from: Offset, to: Offset) {
         val radius = brushRadiusPx
@@ -351,14 +351,14 @@ class ScratchState(
      * Whether a new scratch gesture should be processed.
      *
      * @return true when scratching is enabled, the card is not yet revealed, and the layer has a valid size
-     * @author udit
+     * @author uditbhaskar
      */
     private fun canScratch(): Boolean = scratchEnabled && !isRevealed && layerSize.width > 0 && layerSize.height > 0
 
     /**
      * Copies grid coverage into [scratchProgress] and checks whether the reveal threshold was reached.
      *
-     * @author udit
+     * @author uditbhaskar
      */
     private fun syncProgress() {
         scratchProgress = grid.progress
@@ -368,7 +368,7 @@ class ScratchState(
     /**
      * Marks the card as revealed once coverage crosses [revealThreshold] when [autoRevealEnabled] is on.
      *
-     * @author udit
+     * @author uditbhaskar
      */
     private fun updateRevealState() {
         if (!autoRevealEnabled || isRevealed) return
@@ -393,7 +393,7 @@ class ScratchState(
  * @param brushWidthPx brush diameter used when replaying holes
  * @param brushStyle brush style used when replaying holes
  * @param brushHardness brush hardness used when replaying holes
- * @author udit
+ * @author uditbhaskar
  */
 data class ScratchStateSnapshot(
     val layerWidth: Int,
@@ -445,7 +445,7 @@ data class ScratchStateSnapshot(
  *
  * @param from start of the stroke in layer coordinates
  * @param to end of the stroke in layer coordinates
- * @author udit
+ * @author uditbhaskar
  */
 data class StrokeSegment(
     val from: Offset,
@@ -459,7 +459,7 @@ data class StrokeSegment(
  *
  * @param revealThreshold initial reveal threshold
  * @param autoReveal whether crossing the threshold auto-reveals
- * @author udit
+ * @author uditbhaskar
  */
 @Composable
 fun rememberScratchState(
@@ -478,7 +478,7 @@ fun rememberScratchState(
  * Values are written as Bundle-safe primitives. Restore coerces numbers because
  * `listSaver` often returns [Double] for floats after configuration changes.
  *
- * @author udit
+ * @author uditbhaskar
  */
 val ScratchStateSaver: Saver<ScratchState, Any> = listSaver(
     save = { state ->

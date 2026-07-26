@@ -69,6 +69,30 @@ afterEvaluate {
                 groupId = project.group.toString()
                 artifactId = "scratch"
                 version = project.version.toString()
+
+                pom {
+                    name.set("SKRETCH")
+                    description.set("Scratch cards for Jetpack Compose")
+                    url.set("https://github.com/uditbhaskar/SKRETCH")
+                    licenses {
+                        license {
+                            name.set("MIT License")
+                            url.set("https://opensource.org/licenses/MIT")
+                        }
+                    }
+                    developers {
+                        developer {
+                            id.set("uditbhaskar")
+                            name.set("uditbhaskar")
+                            url.set("https://github.com/uditbhaskar")
+                        }
+                    }
+                    scm {
+                        connection.set("scm:git:git://github.com/uditbhaskar/SKRETCH.git")
+                        developerConnection.set("scm:git:ssh://github.com/uditbhaskar/SKRETCH.git")
+                        url.set("https://github.com/uditbhaskar/SKRETCH")
+                    }
+                }
             }
         }
     }

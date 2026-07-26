@@ -25,7 +25,7 @@ import kotlin.math.min
  * @param borderColor stroke color
  * @param shape outline family
  * @param cornerRadius used by [ScratchCardShape.RoundedRect] and [ScratchCardShape.Ticket]
- * @author udit
+ * @author uditbhaskar
  */
 @Immutable
 data class ScratchCardChrome(
@@ -45,7 +45,7 @@ data class ScratchCardChrome(
      *
      * [ScratchCardShape.Circle] draws a true circle inscribed in the card bounds.
      *
-     * @author udit
+     * @author uditbhaskar
      */
     fun toShape(): Shape = when (shape) {
         ScratchCardShape.RoundedRect -> RoundedCornerShape(cornerRadius)
@@ -65,7 +65,7 @@ data class ScratchCardChrome(
  * Unlike [androidx.compose.foundation.shape.CircleShape] (`RoundedCornerShape(50%)`),
  * this stays circular even when the card width and height differ.
  *
- * @author udit
+ * @author uditbhaskar
  */
 internal object InscribedCircleShape : Shape {
     override fun createOutline(
@@ -87,7 +87,7 @@ internal object InscribedCircleShape : Shape {
  * @param enabled when false, callbacks are never invoked
  * @param onScratchStarted played once on first drag
  * @param onRevealed played when the card reveals
- * @author udit
+ * @author uditbhaskar
  */
 @Immutable
 data class ScratchSoundConfig(
@@ -108,7 +108,7 @@ data class ScratchSoundConfig(
  * @param revealedContentDescription description after reveal
  * @param revealActionLabel TalkBack action that forces reveal without scratching
  * @param announceOnReveal spoken announcement when revealed
- * @author udit
+ * @author uditbhaskar
  */
 @Immutable
 data class ScratchAccessibility(

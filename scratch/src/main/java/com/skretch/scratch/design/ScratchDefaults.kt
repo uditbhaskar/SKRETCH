@@ -7,7 +7,7 @@ import com.skretch.scratch.config.ScratchCoverPattern
 /**
  * Default foil colors, cover-pattern palettes, and card chrome for [com.skretch.scratch.component.ScratchCard].
  *
- * @author udit
+ * @author uditbhaskar
  */
 object ScratchDefaults {
 
@@ -38,7 +38,7 @@ object ScratchDefaults {
     /**
      * Color stops used when drawing a built-in [ScratchCoverPattern].
      *
-     * @author udit
+     * @author uditbhaskar
      */
     data class PatternPalette(
         val dark: Color,
@@ -54,7 +54,7 @@ object ScratchDefaults {
      *
      * @param pattern built-in cover texture
      * @param color caller tint blended into mid / light stops
-     * @author udit
+     * @author uditbhaskar
      */
     fun paletteFor(pattern: ScratchCoverPattern, color: Color): PatternPalette {
         val base = when (pattern) {

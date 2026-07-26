@@ -3,7 +3,7 @@ package com.skretch.scratch.util
 /**
  * Converts scratch brush width in pixels to the eraser radius used by coverage tracking and foil erasure.
  *
- * @author udit
+ * @author uditbhaskar
  */
 internal object ScratchBrushMetrics {
 
@@ -15,7 +15,7 @@ internal object ScratchBrushMetrics {
      *
      * @param brushWidthPx brush diameter in pixels
      * @return brush radius in pixels
-     * @author udit
+     * @author uditbhaskar
      */
     fun radiusFromWidthPx(brushWidthPx: Float): Float =
         maxOf(brushWidthPx * WIDTH_TO_RADIUS_FACTOR, MIN_RADIUS_PX)

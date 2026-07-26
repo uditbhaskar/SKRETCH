@@ -4,7 +4,7 @@ package com.skretch.scratch.config
  * Reveal threshold as a fraction of scratched area between `0f` and `1f`.
  *
  * @param fraction coerced coverage required before auto-reveal
- * @author udit
+ * @author uditbhaskar
  */
 @JvmInline
 value class RevealThreshold private constructor(val fraction: Float) {
@@ -16,7 +16,7 @@ value class RevealThreshold private constructor(val fraction: Float) {
          * Creates a threshold clamped to `0f..1f`.
          *
          * @param fraction raw coverage fraction
-         * @author udit
+         * @author uditbhaskar
          */
         fun of(fraction: Float): RevealThreshold = RevealThreshold(fraction.coerceIn(0f, 1f))
     }
@@ -25,7 +25,7 @@ value class RevealThreshold private constructor(val fraction: Float) {
 /**
  * How the cover disappears once the card is revealed.
  *
- * @author udit
+ * @author uditbhaskar
  */
 enum class ScratchRevealAnimation {
     /** Fade cover alpha to zero. */
@@ -41,7 +41,7 @@ enum class ScratchRevealAnimation {
 /**
  * Intensity of first-scratch haptic feedback.
  *
- * @author udit
+ * @author uditbhaskar
  */
 enum class ScratchHapticIntensity {
     /** No haptic pulse. */
@@ -60,7 +60,7 @@ enum class ScratchHapticIntensity {
 /**
  * Card outline shape for chrome clipping.
  *
- * @author udit
+ * @author uditbhaskar
  */
 enum class ScratchCardShape {
     /** Rounded rectangle using [ScratchCardChrome.cornerRadius]. */

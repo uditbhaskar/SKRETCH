@@ -23,7 +23,7 @@ import com.skretch.scratch.config.MainLayerConfig
  * Prefers [MainLayerConfig.custom] when set; otherwise draws color and optional text.
  *
  * @param config main-layer color, text, or custom content
- * @author udit
+ * @author uditbhaskar
  */
 @Composable
 internal fun MainLayerContent(config: MainLayerConfig) {

@@ -14,7 +14,7 @@ import com.skretch.scratch.config.ScratchHapticIntensity
 /**
  * Scratch-specific haptic feedback fired on the first drag of a card.
  *
- * @author udit
+ * @author uditbhaskar
  */
 internal object ScratchHaptics {
 
@@ -24,7 +24,7 @@ internal object ScratchHaptics {
      * @param hapticFeedback Compose haptic bridge from [androidx.compose.ui.platform.LocalHapticFeedback]
      * @param view host view from [androidx.compose.ui.platform.LocalView]
      * @param intensity how strong the pulse should feel
-     * @author udit
+     * @author uditbhaskar
      */
     fun performFirstScratch(
         hapticFeedback: HapticFeedback,
@@ -55,7 +55,7 @@ internal object ScratchHaptics {
      *
      * @param context context used to resolve the vibrator service
      * @param effect predefined vibration effect
-     * @author udit
+     * @author uditbhaskar
      */
     @SuppressLint("MissingPermission")
     private fun vibrateScratchPulse(context: Context, effect: Int) {
@@ -69,7 +69,7 @@ internal object ScratchHaptics {
      *
      * @param context context used to resolve [Context.VIBRATOR_MANAGER_SERVICE]
      * @return default vibrator, or null when unavailable
-     * @author udit
+     * @author uditbhaskar
      */
     private fun resolveVibrator(context: Context): Vibrator? {
         val manager = context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as? VibratorManager

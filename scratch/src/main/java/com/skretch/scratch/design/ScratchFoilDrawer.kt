@@ -25,7 +25,7 @@ import kotlin.math.max
 /**
  * Procedural scratch cover rendered once into a bitmap overlay.
  *
- * @author udit
+ * @author uditbhaskar
  */
 object ScratchFoilDrawer {
 
@@ -38,7 +38,7 @@ object ScratchFoilDrawer {
      * @param layoutDirection layout direction for drawing
      * @param layerConfig cover color, pattern, and text
      * @return opaque scratchable cover bitmap
-     * @author udit
+     * @author uditbhaskar
      */
     fun renderFoilBitmap(
         width: Int,
@@ -80,7 +80,7 @@ object ScratchFoilDrawer {
      * @param width layer width in pixels
      * @param height layer height in pixels
      * @return white opaque mask bitmap
-     * @author udit
+     * @author uditbhaskar
      */
     fun createOpaqueMask(width: Int, height: Int): ImageBitmap {
         val bitmap = ImageBitmap(width, height)
@@ -102,7 +102,7 @@ object ScratchFoilDrawer {
      * @param size layer size in pixels
      * @param pattern cover preset
      * @param palette colors for the preset
-     * @author udit
+     * @author uditbhaskar
      */
     fun DrawScope.drawCoverPattern(
         size: Size,
@@ -125,7 +125,7 @@ object ScratchFoilDrawer {
      *
      * @param size layer size in pixels
      * @param text label configuration
-     * @author udit
+     * @author uditbhaskar
      */
     fun DrawScope.drawFoilLabel(size: Size, text: ScratchSurfaceText) {
         val resolvedSize = if (text.fontSize == TextUnit.Unspecified) {

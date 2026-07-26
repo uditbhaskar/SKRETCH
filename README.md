@@ -87,4 +87,6 @@ Run `:app` for an interactive catalog:
 
 MIT — see [LICENSE](LICENSE).
 
+**Author:** [uditbhaskar](https://github.com/uditbhaskar)
+
 Compose Multiplatform and Glance widgets are intentionally out of scope for this Android library release.

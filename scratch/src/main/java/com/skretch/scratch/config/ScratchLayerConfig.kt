@@ -20,7 +20,7 @@ import com.skretch.scratch.design.ScratchDefaults
  * @param image optional bitmap cover
  * @param shimmer when true, a light sweep animates across unused cover
  * @param custom optional fully custom cover composable
- * @author udit
+ * @author uditbhaskar
  */
 @Immutable
 data class ScratchLayerConfig(
@@ -45,7 +45,7 @@ data class ScratchLayerConfig(
  * @param color background color when no custom content is set
  * @param text optional title / subtitle drawn on the main surface
  * @param custom optional fully custom content composable
- * @author udit
+ * @author uditbhaskar
  */
 @Immutable
 data class MainLayerConfig(
@@ -66,7 +66,7 @@ data class MainLayerConfig(
  * @param subtitle supporting line under the title
  * @param titleColor color for [title]
  * @param subtitleColor color for [subtitle]
- * @author udit
+ * @author uditbhaskar
  */
 @Immutable
 data class MainLayerText(
@@ -82,7 +82,7 @@ data class MainLayerText(
  * @param style stamp style applied while dragging
  * @param width brush diameter
  * @param hardness edge firmness from `0f` (soft) to `1f` (hard); mainly affects [ScratchBrushStyle.Smooth]
- * @author udit
+ * @author uditbhaskar
  */
 @Immutable
 data class ScratchBrush(
