@@ -21,12 +21,15 @@ internal class ScratchGrid(
     private var layerHeight: Float = 0f
     private var scratchedCells: BooleanArray = BooleanArray(0)
 
+    /** Total number of coverage buckets (`columns * rows`). */
     val totalCells: Int
         get() = columns * rows
 
+    /** Number of buckets marked scratched. */
     val scratchedCount: Int
         get() = scratchedCells.count { it }
 
+    /** Fraction of scratched buckets from `0f` to `1f`. */
     val progress: Float
         get() {
             if (totalCells == 0) return 0f
@@ -97,5 +100,59 @@ internal class ScratchGrid(
     fun reset() {
         if (scratchedCells.isEmpty()) return
         scratchedCells.fill(false)
+    }
+
+    /**
+     * Copies scratched cell flags for persistence.
+     *
+     * @return snapshot of scratched cells, or empty when uninitialized
+     * @author udit
+     */
+    fun snapshotCells(): BooleanArray = scratchedCells.copyOf()
+
+    /**
+     * Restores scratched cell flags from [cells] when sizes match.
+     *
+     * @param cells previously captured scratched flags
+     * @author udit
+     */
+    fun restoreCells(cells: BooleanArray) {
+        if (scratchedCells.size != cells.size) return
+        cells.copyInto(scratchedCells)
+    }
+
+    /**
+     * Invokes [action] with the center of every scratched cell in layer coordinates.
+     *
+     * Used to rebuild foil holes after process death / configuration changes.
+     *
+     * @param action receives cell center in pixels
+     * @author udit
+     */
+    fun forEachScratchedCellCenter(action: (Offset) -> Unit) {
+        if (layerWidth <= 0f || layerHeight <= 0f || scratchedCells.isEmpty()) return
+        val cellWidth = layerWidth / columns
+        val cellHeight = layerHeight / rows
+        scratchedCells.forEachIndexed { index, scratched ->
+            if (!scratched) return@forEachIndexed
+            val column = index % columns
+            val row = index / columns
+            action(
+                Offset(
+                    x = (column + 0.5f) * cellWidth,
+                    y = (row + 0.5f) * cellHeight,
+                ),
+            )
+        }
+    }
+
+    /**
+     * Approximate brush radius that covers one grid cell when replaying saved coverage.
+     *
+     * @author udit
+     */
+    fun cellStampRadius(): Float {
+        if (layerWidth <= 0f || layerHeight <= 0f) return 1f
+        return maxOf(layerWidth / columns, layerHeight / rows) * 0.65f
     }
 }

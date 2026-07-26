@@ -9,6 +9,7 @@ import android.view.HapticFeedbackConstants
 import android.view.View
 import androidx.compose.ui.hapticfeedback.HapticFeedback
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import com.skretch.scratch.config.ScratchHapticIntensity
 
 /**
  * Scratch-specific haptic feedback fired on the first drag of a card.
@@ -18,31 +19,49 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 internal object ScratchHaptics {
 
     /**
-     * Plays a short tactile pulse when the user begins scratching.
-     *
-     * Uses both Compose and platform haptics so the feedback is noticeable on real devices.
+     * Plays a tactile pulse when the user begins scratching.
      *
      * @param hapticFeedback Compose haptic bridge from [androidx.compose.ui.platform.LocalHapticFeedback]
      * @param view host view from [androidx.compose.ui.platform.LocalView]
+     * @param intensity how strong the pulse should feel
      * @author udit
      */
-    fun performFirstScratch(hapticFeedback: HapticFeedback, view: View) {
-        hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
-        view.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
-        vibrateScratchPulse(view.context)
+    fun performFirstScratch(
+        hapticFeedback: HapticFeedback,
+        view: View,
+        intensity: ScratchHapticIntensity = ScratchHapticIntensity.Medium,
+    ) {
+        if (intensity == ScratchHapticIntensity.Off) return
+        when (intensity) {
+            ScratchHapticIntensity.Light -> {
+                hapticFeedback.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                view.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
+            }
+            ScratchHapticIntensity.Medium -> {
+                hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
+                view.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
+                vibrateScratchPulse(view.context, VibrationEffect.EFFECT_CLICK)
+            }
+            ScratchHapticIntensity.Strong -> {
+                hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
+                view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
+                vibrateScratchPulse(view.context, VibrationEffect.EFFECT_HEAVY_CLICK)
+            }
+        }
     }
 
     /**
      * Plays a short device vibration to reinforce the first scratch gesture.
      *
      * @param context context used to resolve the vibrator service
+     * @param effect predefined vibration effect
      * @author udit
      */
     @SuppressLint("MissingPermission")
-    private fun vibrateScratchPulse(context: Context) {
+    private fun vibrateScratchPulse(context: Context, effect: Int) {
         val vibrator = resolveVibrator(context) ?: return
         if (!vibrator.hasVibrator()) return
-        vibrator.vibrate(VibrationEffect.createPredefined(VibrationEffect.EFFECT_CLICK))
+        vibrator.vibrate(VibrationEffect.createPredefined(effect))
     }
 
     /**

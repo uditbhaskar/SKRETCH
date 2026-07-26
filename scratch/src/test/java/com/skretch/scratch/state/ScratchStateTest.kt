@@ -3,6 +3,7 @@ package com.skretch.scratch.state
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.unit.IntSize
 import com.skretch.scratch.ScratchConstants
+import com.skretch.scratch.config.ScratchBrushStyle
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
@@ -195,6 +196,92 @@ class ScratchStateTest {
 
         assertTrue(defaultState.isRevealed)
         assertEquals(1f, defaultState.scratchProgress, 0.001f)
+    }
+
+    @Test
+    fun reveal_forcesRevealedWithoutThreshold() {
+        scratchState.reveal()
+
+        assertTrue(scratchState.isRevealed)
+        assertEquals(1f, scratchState.scratchProgress, 0.001f)
+    }
+
+    @Test
+    fun autoRevealDisabled_doesNotRevealAtThreshold() {
+        val gated = ScratchState(
+            initialRevealThreshold = 0.05f,
+            initialBrushWidthPx = 40f,
+            autoReveal = false,
+        )
+        gated.updateLayerSize(IntSize(400, 400))
+        gated.handleDragStart(Offset(20f, 200f))
+        gated.handleDrag(Offset(380f, 200f))
+        gated.handleDragEnd()
+
+        assertFalse(gated.isRevealed)
+        assertTrue(gated.scratchProgress > 0f)
+
+        gated.reveal()
+        assertTrue(gated.isRevealed)
+    }
+
+    @Test
+    fun snapshotAndRestore_preservesCoverageAndReveal() {
+        scratchUntilRevealed(scratchState)
+        val snapshot = scratchState.snapshot()
+
+        scratchState.reset()
+        assertFalse(scratchState.isRevealed)
+        assertEquals(0f, scratchState.scratchProgress, 0.001f)
+
+        scratchState.restore(snapshot)
+        assertTrue(scratchState.isRevealed)
+        assertEquals(1f, scratchState.scratchProgress, 0.001f)
+    }
+
+    @Test
+    fun snapshotAndRestore_preservesBrushStyle() {
+        scratchState.updateBrushStyle(ScratchBrushStyle.Hairy, hardness = 0.4f)
+        scratchState.updateBrushWidthPx(60f)
+        scratchState.handleDragStart(Offset(100f, 100f))
+        scratchState.handleDragEnd()
+        val snapshot = scratchState.snapshot()
+
+        val other = ScratchState(initialBrushWidthPx = 10f, autoReveal = true)
+        other.restore(snapshot)
+
+        assertEquals(ScratchBrushStyle.Hairy, other.snapshot().brushStyle)
+        assertEquals(0.4f, other.snapshot().brushHardness, 0.001f)
+        assertEquals(60f, other.snapshot().brushWidthPx, 0.001f)
+    }
+
+    @Test
+    fun scratchStateSaver_restoresWhenBundleWidensFloatsToDouble() {
+        scratchState.updateBrushStyle(ScratchBrushStyle.Smooth, hardness = 0.3f)
+        scratchState.updateBrushWidthPx(48f)
+        scratchState.handleDragStart(Offset(120f, 120f))
+        scratchState.handleDragEnd()
+        val snapshot = scratchState.snapshot()
+        val bundleLike = listOf(
+            snapshot.layerWidth.toDouble(),
+            snapshot.layerHeight.toDouble(),
+            snapshot.scratchedCells.map { if (it) 1 else 0 },
+            snapshot.scratchProgress.toDouble(),
+            if (snapshot.isRevealed) 1 else 0,
+            if (snapshot.hasStarted) 1 else 0,
+            snapshot.revealThreshold.toDouble(),
+            if (snapshot.autoReveal) 1 else 0,
+            snapshot.brushWidthPx.toDouble(),
+            snapshot.brushStyle.name,
+            snapshot.brushHardness.toDouble(),
+        )
+
+        val restored = ScratchStateSaver.restore(bundleLike)!!
+        assertEquals(scratchState.scratchProgress, restored.scratchProgress, 0.001f)
+        assertEquals(scratchState.isRevealed, restored.isRevealed)
+        assertEquals(ScratchBrushStyle.Smooth, restored.snapshot().brushStyle)
+        assertEquals(0.3f, restored.snapshot().brushHardness, 0.001f)
+        assertEquals(48f, restored.snapshot().brushWidthPx, 0.001f)
     }
 
     private fun scratchUntilRevealed(state: ScratchState) {

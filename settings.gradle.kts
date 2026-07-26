@@ -26,4 +26,6 @@ dependencyResolutionManagement {
 
 rootProject.name = "SKRETCH"
 include(":app", ":scratch")
+
+enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
  

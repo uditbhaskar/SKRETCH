@@ -4,7 +4,7 @@ plugins {
     `maven-publish`
 }
 
-group = "com.github.YOUR_USERNAME"
+group = "com.github.uditbhaskar"
 version = "0.1.0"
 
 android {

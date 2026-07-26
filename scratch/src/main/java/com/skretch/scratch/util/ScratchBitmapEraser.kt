@@ -1,5 +1,6 @@
 package com.skretch.scratch.util
 
+import android.graphics.BlurMaskFilter
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.PorterDuff
@@ -8,9 +9,13 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asAndroidBitmap
 import com.skretch.scratch.ScratchConstants
+import com.skretch.scratch.config.ScratchBrushStyle
+import kotlin.math.cos
+import kotlin.math.sin
+import kotlin.random.Random
 
 /**
- * Erases circular stamps from a foil [ImageBitmap] using a clear compositing mode.
+ * Erases brush stamps from a foil or mask [ImageBitmap] using clear compositing.
  *
  * @author udit
  */
@@ -21,33 +26,54 @@ internal object ScratchBitmapEraser {
     }
 
     /**
-     * Erases a circular brush stamp at [center].
+     * Erases a stamp at [center] using [style].
      *
-     * @param bitmap mutable foil overlay bitmap
+     * @param bitmap mutable foil or mask bitmap
      * @param center stamp center in layer coordinates
-     * @param radius brush radius in pixels from [com.skretch.scratch.util.ScratchBrushMetrics]
+     * @param radius brush radius in pixels from [ScratchBrushMetrics]
+     * @param style circular, smooth, or hairy stamp
+     * @param hardness edge firmness from `0f` to `1f`; mainly affects smooth / hairy stamps
      * @author udit
      */
-    fun eraseCircle(bitmap: ImageBitmap, center: Offset, radius: Float) {
+    fun eraseStamp(
+        bitmap: ImageBitmap,
+        center: Offset,
+        radius: Float,
+        style: ScratchBrushStyle = ScratchBrushStyle.Circular,
+        hardness: Float = 0.65f,
+    ) {
         if (radius <= 0f) return
-        val canvas = Canvas(bitmap.asAndroidBitmap())
-        canvas.drawCircle(center.x, center.y, radius, clearPaint)
+        val clampedHardness = hardness.coerceIn(0f, 1f)
+        when (style) {
+            ScratchBrushStyle.Circular -> eraseCircle(bitmap, center, radius)
+            ScratchBrushStyle.Smooth -> eraseSmooth(bitmap, center, radius, clampedHardness)
+            ScratchBrushStyle.Hairy -> eraseHairy(bitmap, center, radius, clampedHardness)
+        }
     }
 
     /**
      * Erases along the segment between [from] and [to] so fast swipes leave a continuous trail.
      *
-     * @param bitmap mutable foil overlay bitmap
+     * @param bitmap mutable foil or mask bitmap
      * @param from previous touch position in layer coordinates
      * @param to current touch position in layer coordinates
-     * @param radius brush radius in pixels from [com.skretch.scratch.util.ScratchBrushMetrics]
+     * @param radius brush radius in pixels from [ScratchBrushMetrics]
+     * @param style circular, smooth, or hairy stamp
+     * @param hardness edge firmness from `0f` to `1f`
      * @author udit
      */
-    fun eraseStroke(bitmap: ImageBitmap, from: Offset, to: Offset, radius: Float) {
+    fun eraseStroke(
+        bitmap: ImageBitmap,
+        from: Offset,
+        to: Offset,
+        radius: Float,
+        style: ScratchBrushStyle = ScratchBrushStyle.Circular,
+        hardness: Float = 0.65f,
+    ) {
         if (radius <= 0f) return
         val distance = (to - from).getDistance()
         if (distance <= 0f) {
-            eraseCircle(bitmap, to, radius)
+            eraseStamp(bitmap, to, radius, style, hardness)
             return
         }
 
@@ -59,9 +85,62 @@ internal object ScratchBitmapEraser {
                 x = from.x + ((to.x - from.x) * fraction),
                 y = from.y + ((to.y - from.y) * fraction),
             )
-            eraseCircle(bitmap, point, radius)
+            eraseStamp(bitmap, point, radius, style, hardness)
             traveled += step
         }
-        eraseCircle(bitmap, to, radius)
+        eraseStamp(bitmap, to, radius, style, hardness)
+    }
+
+    /**
+     * Erases a hard circular brush stamp at [center].
+     *
+     * @param bitmap mutable foil or mask bitmap
+     * @param center stamp center in layer coordinates
+     * @param radius brush radius in pixels
+     * @author udit
+     */
+    fun eraseCircle(bitmap: ImageBitmap, center: Offset, radius: Float) {
+        if (radius <= 0f) return
+        val canvas = Canvas(bitmap.asAndroidBitmap())
+        canvas.drawCircle(center.x, center.y, radius, clearPaint)
+    }
+
+    private fun eraseSmooth(
+        bitmap: ImageBitmap,
+        center: Offset,
+        radius: Float,
+        hardness: Float,
+    ) {
+        val canvas = Canvas(bitmap.asAndroidBitmap())
+        val blurFactor = 0.15f + (1f - hardness) * 0.55f
+        val softPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            xfermode = PorterDuffXfermode(PorterDuff.Mode.CLEAR)
+            maskFilter = BlurMaskFilter(radius * blurFactor, BlurMaskFilter.Blur.NORMAL)
+        }
+        val coreFactor = 0.35f + hardness * 0.45f
+        canvas.drawCircle(center.x, center.y, radius * 0.9f, softPaint)
+        canvas.drawCircle(center.x, center.y, radius * coreFactor, clearPaint)
+    }
+
+    private fun eraseHairy(
+        bitmap: ImageBitmap,
+        center: Offset,
+        radius: Float,
+        hardness: Float,
+    ) {
+        val canvas = Canvas(bitmap.asAndroidBitmap())
+        val seed = (center.x * 1000f).toInt() xor (center.y * 1000f).toInt()
+        val random = Random(seed)
+        val core = 0.25f + hardness * 0.35f
+        canvas.drawCircle(center.x, center.y, radius * core, clearPaint)
+        val bristles = 6 + (hardness * 8).toInt()
+        repeat(bristles) {
+            val angle = random.nextFloat() * (Math.PI * 2.0)
+            val distance = radius * (0.2f + random.nextFloat() * 0.75f)
+            val bristleRadius = radius * (0.1f + random.nextFloat() * (0.35f - hardness * 0.12f))
+            val x = center.x + (cos(angle) * distance).toFloat()
+            val y = center.y + (sin(angle) * distance).toFloat()
+            canvas.drawCircle(x, y, bristleRadius, clearPaint)
+        }
     }
 }
