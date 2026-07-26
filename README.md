@@ -2,7 +2,9 @@
 
 [![](https://jitpack.io/v/uditbhaskar/SKRETCH.svg)](https://jitpack.io/#uditbhaskar/SKRETCH)
 
-Scratch cards for Jetpack Compose — two customizable surfaces, brush styles, presets, and reveal controls.
+A Jetpack Compose scratch card library. Customize the cover and reward layers, pick a brush, or drop in a preset and go.
+
+By [uditbhaskar](https://github.com/uditbhaskar).
 
 ## Install
 
@@ -11,9 +13,7 @@ maven { url = uri("https://jitpack.io") }
 implementation("com.github.uditbhaskar.SKRETCH:scratch:0.1.0")
 ```
 
-Or `implementation(projects.scratch)` in a multi-module project.
-
-**Author:** [uditbhaskar](https://github.com/uditbhaskar)
+In a multi-module project you can also use `implementation(projects.scratch)`.
 
 ## Quick usage
 
@@ -26,7 +26,7 @@ ScratchCard(
     onRevealed = { },
 )
 
-// Or fully custom:
+// Fully custom:
 ScratchCard(
     scratchLayer = ScratchLayerConfig(
         pattern = ScratchCoverPattern.Holographic,
@@ -48,39 +48,35 @@ ScratchCard(
 )
 ```
 
-Default brush diameter is **52dp** (`ScratchConstants.DEFAULT_BRUSH_WIDTH_DP`) when you omit `width` on `ScratchBrush` factories.
+If you don't pass a brush width, it defaults to 52dp (`ScratchConstants.DEFAULT_BRUSH_WIDTH_DP`).
 
-## Features
+## What's included
 
-| Area | Options |
-|------|---------|
-| Scratch layer | color, text, patterns (`Silver/Gold/Matte/Holographic/Grain`), image, shimmer, custom composable |
-| Main layer | color, text, custom composable |
-| Brush | Circular / Smooth / Hairy + width (default 52dp) + hardness |
-| Chrome | elevation, border, shapes (`RoundedRect/Circle/Ticket`) |
-| Reveal | `RevealThreshold`, Fade / ScalePop / None, `autoReveal` + `state.reveal()` |
-| State | `rememberScratchState()` persists coverage, reveal, and brush across config changes; also `snapshot()` / `restore()` / `reset()` |
-| Feedback | haptic intensity, optional sound hooks |
-| A11y | content descriptions + TalkBack “Reveal reward” action |
-| UI helpers | presets (`promo` / `wallet` / `game` / `matte` / `party` / `minimal`) |
+| | |
+|--|--|
+| Scratch layer | color, text, patterns (Silver, Gold, Matte, Holographic, Grain), image, shimmer, custom composable |
+| Main layer | color, text, or your own composable |
+| Brush | Circular, Smooth, Hairy (width + hardness) |
+| Chrome | elevation, border, RoundedRect / Circle / Ticket |
+| Reveal | threshold, Fade / ScalePop / None, autoReveal or `state.reveal()` |
+| State | `rememberScratchState()` keeps progress across rotation; also snapshot / restore / reset |
+| Extra | haptics, optional sound hooks, TalkBack labels + Reveal action |
+| Presets | promo, wallet, game, matte, party, minimal |
 
-### Presets at a glance
+### Presets
 
 | Preset | Cover | Brush | Shape |
 |--------|-------|-------|-------|
-| `promo` | Silver | Circular | RoundedRect |
-| `wallet` | Gold + shimmer | Circular | RoundedRect |
-| `game` | Holographic + shimmer | Smooth | Ticket |
-| `matte` | Matte | Circular | RoundedRect |
-| `party` | Grain + shimmer | Hairy | Circle |
-| `minimal` | Silver | Smooth (thin) | RoundedRect |
+| promo | Silver | Circular | RoundedRect |
+| wallet | Gold + shimmer | Circular | RoundedRect |
+| game | Holographic + shimmer | Smooth | Ticket |
+| matte | Matte | Circular | RoundedRect |
+| party | Grain + shimmer | Hairy | Circle |
+| minimal | Silver | Smooth (thin) | RoundedRect |
 
 ## Demo
 
-Run `:app` for an interactive catalog:
-
-- Main screen: live card + Pattern / Brush / Shape / Extras chips
-- **Browse presets** opens a separate screen to pick a ready-made look (`ScratchPresetsScreen`)
+Run the `:app` module to try patterns, brushes, shapes, and presets. Presets live on their own screen.
 
 ```bash
 ./gradlew :app:assembleDebug
@@ -89,6 +85,6 @@ Run `:app` for an interactive catalog:
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
+MIT. See [LICENSE](LICENSE).
 
-Compose Multiplatform and Glance widgets are intentionally out of scope for this Android library release.
+Compose Multiplatform and Glance are out of scope for this Android release.
