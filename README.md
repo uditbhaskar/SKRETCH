@@ -1,5 +1,7 @@
 # SKRETCH
 
+[![](https://jitpack.io/v/uditbhaskar/SKRETCH.svg)](https://jitpack.io/#uditbhaskar/SKRETCH)
+
 Scratch cards for Jetpack Compose — two customizable surfaces, brush styles, presets, and reveal controls.
 
 ## Install
