@@ -52,8 +52,6 @@ ScratchCard(
 )
 ```
 
-If you don't pass a brush width, it defaults to 52dp (`ScratchConstants.DEFAULT_BRUSH_WIDTH_DP`).
-
 ## What's included
 
 | | |
@@ -89,5 +87,3 @@ Run the `:app` module to try patterns, brushes, shapes, and presets. Presets liv
 ## License
 
 MIT. See [LICENSE](LICENSE).
-
-Compose Multiplatform and Glance are out of scope for this Android release.
