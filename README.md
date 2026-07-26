@@ -6,10 +6,12 @@ Scratch cards for Jetpack Compose — two customizable surfaces, brush styles, p
 
 ```kotlin
 maven { url = uri("https://jitpack.io") }
-implementation("com.github.uditbhaskar:SKRETCH:0.1.0")
+implementation("com.github.uditbhaskar.SKRETCH:scratch:0.1.0")
 ```
 
 Or `implementation(projects.scratch)` in a multi-module project.
+
+**Author:** [uditbhaskar](https://github.com/uditbhaskar)
 
 ## Quick usage
 
@@ -86,7 +88,5 @@ Run `:app` for an interactive catalog:
 ## License
 
 MIT — see [LICENSE](LICENSE).
-
-**Author:** [uditbhaskar](https://github.com/uditbhaskar)
 
 Compose Multiplatform and Glance widgets are intentionally out of scope for this Android library release.
