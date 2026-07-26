@@ -139,7 +139,11 @@ fun ScratchCard(
 /**
  * Applies a [ScratchCardPreset] in one call.
  *
- * @param preset bundled layer, brush, and chrome settings
+ * Cover, main layer, brush, chrome, reveal threshold / animation, haptic intensity, and
+ * auto-reveal are taken from [preset]. You can still override [sound], [accessibility],
+ * multitouch, and callbacks.
+ *
+ * @param preset bundled layer, brush, chrome, and reveal settings
  * @param modifier modifier applied to this card
  * @param state optional hoisted scratch state
  * @param enabled when false, scratch gestures are ignored
@@ -186,8 +190,27 @@ fun ScratchCard(
 }
 
 /**
- * Convenience overload that keeps a trailing [content] lambda for the main layer.
+ * Convenience overload that keeps a trailing [content] lambda for the main (reward) layer.
  *
+ * Equivalent to passing `mainLayer = MainLayerConfig(custom = content)`.
+ *
+ * @param modifier modifier applied to this card
+ * @param scratchLayer cover color, pattern, image, text, shimmer, or custom composable
+ * @param brush brush style, diameter, and hardness
+ * @param chrome elevation, border, and outline shape
+ * @param revealThreshold coverage required before auto-reveal
+ * @param revealAnimation how the cover disappears
+ * @param hapticIntensity first-scratch haptic strength
+ * @param sound optional scratch / reveal sound hooks
+ * @param accessibility TalkBack labels and reveal action
+ * @param autoReveal when false, call [ScratchState.reveal] yourself
+ * @param multiTouchEnabled when true, all active pointers scratch
+ * @param enabled when false, scratch gestures are ignored
+ * @param state optional hoisted scratch state; when null a state is remembered internally
+ * @param onScratchStarted called the first time the user starts scratching
+ * @param onScratchProgress called when scratch coverage changes; reports `1f` after reveal
+ * @param onRevealed called once when the card reveals
+ * @param content composable drawn as the revealed main layer
  * @author uditbhaskar
  */
 @Composable

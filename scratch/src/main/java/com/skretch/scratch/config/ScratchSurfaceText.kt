@@ -6,17 +6,21 @@ import androidx.compose.ui.unit.TextUnit
 import com.skretch.scratch.ScratchConstants
 
 /**
- * Text drawn on a scratch or main surface.
+ * Hint label drawn on the scratch **cover** ([ScratchLayerConfig.text]).
  *
- * @param text label content
- * @param color text color
- * @param fontSize text size; [TextUnit.Unspecified] lets the drawer pick a size from the layer width
+ * For reward title / subtitle on the main layer, use [MainLayerText] instead.
+ *
  * @author uditbhaskar
  */
 @Immutable
 data class ScratchSurfaceText(
+    /** Label content (e.g. "SCRATCH HERE"). */
     val text: String,
+    /** Text color. */
     val color: Color = Color(0xFF5A606C).copy(alpha = 0.45f),
+    /**
+     * Text size. [TextUnit.Unspecified] lets the foil drawer pick a size from the layer width.
+     */
     val fontSize: TextUnit = TextUnit.Unspecified,
 ) {
     companion object {
@@ -28,7 +32,7 @@ data class ScratchSurfaceText(
 }
 
 /**
- * Built-in cover textures for the scratch layer.
+ * Built-in cover textures for [ScratchLayerConfig.pattern].
  *
  * @author uditbhaskar
  */
@@ -50,7 +54,7 @@ enum class ScratchCoverPattern {
 }
 
 /**
- * Brush style used when erasing the scratch layer.
+ * Brush stamp style for [ScratchBrush.style].
  *
  * @author uditbhaskar
  */

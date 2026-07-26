@@ -21,11 +21,17 @@ import com.skretch.scratch.config.ScratchBrushStyle
 /**
  * Tracks scratch gestures, coverage, and reveal status for a single card.
  *
- * [scratchProgress] is a value between `0f` and `1f`. When [autoReveal] is enabled,
+ * **App-facing APIs:** [scratchProgress], [isRevealed], [hasStarted], [reveal], [reset],
+ * [snapshot], [restore]. Prefer creating state with [rememberScratchState].
+ *
+ * Gesture and brush plumbing (`handleDrag*`, layer size / brush updates, `paintCoverageOnto`)
+ * is used by the library overlay; you normally do not call those from app code.
+ *
+ * [scratchProgress] is between `0f` and `1f`. When auto-reveal is enabled,
  * [isRevealed] becomes `true` once coverage reaches the reveal threshold and progress snaps to `1f`.
  *
  * @param initialRevealThreshold fraction of the card that must be scratched before reveal
- * @param initialBrushWidthPx brush width in pixels; must stay in sync with foil erasure
+ * @param initialBrushWidthPx brush width in pixels; kept in sync with foil erasure by ScratchCard
  * @param autoReveal when false, threshold does not auto-reveal; call [reveal] manually
  * @author uditbhaskar
  */
@@ -71,7 +77,7 @@ class ScratchState(
     /**
      * Updates how much of the card must be scratched before it is revealed.
      *
-     * @param threshold fraction between 0 and 1, or a [RevealThreshold]
+     * @param threshold fraction between `0f` and `1f`
      * @author uditbhaskar
      */
     fun updateRevealThreshold(threshold: Float) {

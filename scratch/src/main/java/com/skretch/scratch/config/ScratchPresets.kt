@@ -5,7 +5,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 
 /**
- * One-line presets that fill both layers and brush for common product looks.
+ * One-line presets that fill both layers, brush, chrome, and reveal defaults.
+ *
+ * Factories: [promo], [wallet], [game], [matte], [party], [minimal].
+ * Each returns a [ScratchCardPreset] for [com.skretch.scratch.component.ScratchCard].
  *
  * @author uditbhaskar
  */
@@ -199,24 +202,28 @@ object ScratchPresets {
 /**
  * Bundled card configuration returned by [ScratchPresets].
  *
- * @param scratchLayer cover surface
- * @param mainLayer revealed surface
- * @param brush stamp style and size
- * @param chrome elevation, border, and outline shape
- * @param revealThreshold coverage required before auto-reveal
- * @param revealAnimation how the cover disappears
- * @param hapticIntensity first-scratch haptic strength
- * @param autoReveal when false, call [com.skretch.scratch.state.ScratchState.reveal] yourself
+ * Pass to [com.skretch.scratch.component.ScratchCard] via the `preset =` overload.
+ * Reveal animation, haptic intensity, threshold, and [autoReveal] come from this object
+ * (they are not separate parameters on the preset overload).
+ *
  * @author uditbhaskar
  */
 @Immutable
 data class ScratchCardPreset(
+    /** Cover surface (pattern, text, shimmer, etc.). */
     val scratchLayer: ScratchLayerConfig,
+    /** Revealed reward surface. */
     val mainLayer: MainLayerConfig,
+    /** Stamp style and size. */
     val brush: ScratchBrush,
+    /** Elevation, border, and outline shape. */
     val chrome: ScratchCardChrome = ScratchCardChrome.Default,
+    /** Coverage required before auto-reveal. */
     val revealThreshold: RevealThreshold = RevealThreshold.Default,
+    /** How the cover disappears after reveal. */
     val revealAnimation: ScratchRevealAnimation = ScratchRevealAnimation.Fade,
+    /** First-scratch haptic strength. */
     val hapticIntensity: ScratchHapticIntensity = ScratchHapticIntensity.Medium,
+    /** When false, call [com.skretch.scratch.state.ScratchState.reveal] yourself. */
     val autoReveal: Boolean = true,
 )

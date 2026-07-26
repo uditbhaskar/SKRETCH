@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "com.github.uditbhaskar"
-version = "0.1.0"
+version = "0.1.1"
 
 android {
     namespace = "com.skretch.scratch"
