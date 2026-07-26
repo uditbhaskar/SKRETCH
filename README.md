@@ -15,6 +15,10 @@ implementation("com.github.uditbhaskar.SKRETCH:scratch:0.1.0")
 
 In a multi-module project you can also use `implementation(projects.scratch)`.
 
+
+## Demo
+https://github.com/user-attachments/assets/bca137a7-0787-471a-8a8a-32b7ccf1c141
+
 ## Quick usage
 
 ```kotlin
@@ -74,9 +78,6 @@ If you don't pass a brush width, it defaults to 52dp (`ScratchConstants.DEFAULT_
 | party | Grain + shimmer | Hairy | Circle |
 | minimal | Silver | Smooth (thin) | RoundedRect |
 
-## Demo
-
-![SKRETCH demo](docs/media/DEMO_SKRETCH.mp4)
 
 Run the `:app` module to try patterns, brushes, shapes, and presets. Presets live on their own screen.
 
