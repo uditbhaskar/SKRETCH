@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "com.github.uditbhaskar"
-version = "0.1.1"
+version = "0.1.2"
 
 android {
     namespace = "com.skretch.scratch"
@@ -66,8 +66,9 @@ afterEvaluate {
         publications {
             create<MavenPublication>("release") {
                 from(components["release"])
-                groupId = project.group.toString()
-                artifactId = "scratch"
+                // Must match the GitHub repo name so JitPack keeps sources metadata intact.
+                groupId = "com.github.uditbhaskar"
+                artifactId = "SKRETCH"
                 version = project.version.toString()
 
                 pom {
