@@ -17,7 +17,7 @@ dependencyResolutionManagement {
 }
 
 dependencies {
-    implementation("com.github.uditbhaskar:SKRETCH:0.1.3")
+    implementation("com.github.uditbhaskar:SKRETCH:0.1.2")
 }
 ```
 
@@ -25,7 +25,7 @@ dependencies {
 
 Sources ship with the library. After syncing:
 
-1. Open **External Libraries** → `SKRETCH-0.1.3`
+1. Open **External Libraries** → `SKRETCH-0.1.2`
 2. Right-click → **Download Sources** (if needed)
 3. Cmd/Ctrl+click any type to open source with comments
 
@@ -475,6 +475,26 @@ This repo’s `:app` module is a live catalog (patterns, brushes, shapes, preset
 ./gradlew :app:assembleDebug
 ./gradlew :scratch:test
 ```
+
+## Issues and contributing
+
+SKRETCH is still in beta. Bugs and rough edges are expected.
+
+**Found a bug or something missing?** Open an [issue](https://github.com/uditbhaskar/SKRETCH/issues) with:
+
+- What you expected
+- What actually happened
+- Library version (e.g. the tag you depend on)
+- A short Compose snippet if you can
+
+**Want to contribute?** PRs are welcome.
+
+1. Fork the repo and create a branch
+2. Make your change in `:scratch` (and `:app` if the demo needs an update)
+3. Run `./gradlew :scratch:test` and `:app:assembleDebug`
+4. Open a PR with a short description of what changed and why
+
+Keep PRs focused. Prefer small fixes and clear API improvements over large refactors.
 
 ## License
 
