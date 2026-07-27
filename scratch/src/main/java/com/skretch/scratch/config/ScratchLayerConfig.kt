@@ -14,27 +14,26 @@ import com.skretch.scratch.design.ScratchDefaults
  *
  * Draw priority when more than one is set: [custom] > [image] > procedural [pattern] + [color] + [text].
  *
- * Open this class in the IDE to inspect each property.
+ * Companion [Default] is a silver pattern cover with the default scratch hint.
  *
+ * @param color tint mixed into the procedural [pattern]; ignored when [image] or [custom] is used
+ * @param text optional hint label drawn on the cover (e.g. "SCRATCH HERE")
+ * @param pattern built-in foil texture when [image] and [custom] are null
+ * @param image bitmap cover; takes priority over [pattern]
+ * @param shimmer when true, a light sweep animates across unused cover
+ * @param custom fully custom cover composable; highest priority when non-null
  * @author uditbhaskar
  */
 @Immutable
 data class ScratchLayerConfig(
-    /** Tint mixed into the procedural [pattern]. Ignored when [image] or [custom] is used. */
     val color: Color = ScratchDefaults.foilBaseMid,
-    /** Optional hint label drawn on the cover (e.g. "SCRATCH HERE"). */
     val text: ScratchSurfaceText? = ScratchSurfaceText.DefaultScratchHint,
-    /** Built-in foil texture when [image] and [custom] are null. */
     val pattern: ScratchCoverPattern = ScratchCoverPattern.Silver,
-    /** Bitmap cover. Takes priority over [pattern]. */
     val image: ImageBitmap? = null,
-    /** When true, a light sweep animates across unused cover. */
     val shimmer: Boolean = false,
-    /** Fully custom cover composable. Highest priority when non-null. */
     val custom: (@Composable () -> Unit)? = null,
 ) {
     companion object {
-        /** Silver pattern cover with the default scratch hint. */
         val Default = ScratchLayerConfig()
     }
 }
@@ -44,19 +43,20 @@ data class ScratchLayerConfig(
  *
  * When [custom] is non-null it replaces [color] and [text].
  *
+ * Companion [Default] is a plain white main layer with no text.
+ *
+ * @param color background fill when [custom] is null
+ * @param text built-in title / subtitle; ignored when [custom] is set
+ * @param custom fully custom reward content; takes priority over [color] and [text]
  * @author uditbhaskar
  */
 @Immutable
 data class MainLayerConfig(
-    /** Background fill when [custom] is null. */
     val color: Color = Color.White,
-    /** Built-in title / subtitle. Ignored when [custom] is set. */
     val text: MainLayerText? = null,
-    /** Fully custom reward content. Takes priority over [color] and [text]. */
     val custom: (@Composable () -> Unit)? = null,
 ) {
     companion object {
-        /** Plain white main layer with no text. */
         val Default = MainLayerConfig()
     }
 }
@@ -64,17 +64,17 @@ data class MainLayerConfig(
 /**
  * Built-in title and subtitle for the main (reward) layer.
  *
+ * @param title primary reward line
+ * @param subtitle optional supporting line under [title]
+ * @param titleColor color for [title]
+ * @param subtitleColor color for [subtitle]
  * @author uditbhaskar
  */
 @Immutable
 data class MainLayerText(
-    /** Primary reward line. */
     val title: String,
-    /** Optional supporting line under [title]. */
     val subtitle: String? = null,
-    /** Color for [title]. */
     val titleColor: Color = Color(0xFF1A73E8),
-    /** Color for [subtitle]. */
     val subtitleColor: Color = Color(0xFF5F6368),
 )
 
@@ -84,28 +84,25 @@ data class MainLayerText(
  * Prefer [circular], [smooth], or [hairy] factories. Default [width] is
  * [ScratchConstants.DEFAULT_BRUSH_WIDTH_DP] (52dp).
  *
+ * Companion presets: [Circular] (hard circular at default width), [Smooth] (soft circular with
+ * lighter default hardness), [Hairy] (bristly clustered at default width).
+ *
+ * @param style stamp style applied while dragging
+ * @param width brush diameter
+ * @param hardness edge firmness from `0f` (soft) to `1f` (hard); mainly affects [ScratchBrushStyle.Smooth]
  * @author uditbhaskar
  */
 @Immutable
 data class ScratchBrush(
-    /** Stamp style applied while dragging. */
     val style: ScratchBrushStyle = ScratchBrushStyle.Circular,
-    /** Brush diameter. */
     val width: Dp = ScratchConstants.DEFAULT_BRUSH_WIDTH_DP.dp,
-    /**
-     * Edge firmness from `0f` (soft) to `1f` (hard).
-     * Mainly affects [ScratchBrushStyle.Smooth].
-     */
     val hardness: Float = 0.65f,
 ) {
     companion object {
-        /** Hard circular brush at the default width. */
         val Circular = ScratchBrush(style = ScratchBrushStyle.Circular)
 
-        /** Soft circular brush with a lighter default hardness. */
         val Smooth = ScratchBrush(style = ScratchBrushStyle.Smooth, hardness = 0.35f)
 
-        /** Bristly clustered brush at the default width. */
         val Hairy = ScratchBrush(style = ScratchBrushStyle.Hairy)
 
         /**
@@ -113,6 +110,8 @@ data class ScratchBrush(
          *
          * @param width brush diameter; defaults to [ScratchConstants.DEFAULT_BRUSH_WIDTH_DP]
          * @param hardness edge firmness `0f..1f`
+         * @return configured [ScratchBrush]
+         * @author uditbhaskar
          */
         fun circular(
             width: Dp = ScratchConstants.DEFAULT_BRUSH_WIDTH_DP.dp,
@@ -124,6 +123,8 @@ data class ScratchBrush(
          *
          * @param width brush diameter; defaults to [ScratchConstants.DEFAULT_BRUSH_WIDTH_DP]
          * @param hardness edge firmness `0f..1f`
+         * @return configured [ScratchBrush]
+         * @author uditbhaskar
          */
         fun smooth(
             width: Dp = ScratchConstants.DEFAULT_BRUSH_WIDTH_DP.dp,
@@ -135,6 +136,8 @@ data class ScratchBrush(
          *
          * @param width brush diameter; defaults to [ScratchConstants.DEFAULT_BRUSH_WIDTH_DP]
          * @param hardness edge firmness `0f..1f`
+         * @return configured [ScratchBrush]
+         * @author uditbhaskar
          */
         fun hairy(
             width: Dp = ScratchConstants.DEFAULT_BRUSH_WIDTH_DP.dp,

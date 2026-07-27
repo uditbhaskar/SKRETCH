@@ -7,37 +7,32 @@ import com.skretch.scratch.config.ScratchCoverPattern
 /**
  * Default foil colors, cover-pattern palettes, and card chrome for [com.skretch.scratch.component.ScratchCard].
  *
+ * Foil stops: [foilBaseDark], [foilBaseMid] (also ScratchLayerConfig default color), [foilBaseLight],
+ * [foilHighlight], [foilTint], and [foilBorderDark] (chrome border base).
+ * Chrome defaults: [cardElevation], [cardBorderWidth].
+ *
  * @author uditbhaskar
  */
 object ScratchDefaults {
 
-    /** Dark stop for the default silver foil. */
     val foilBaseDark = Color(0xFF9AA1AB)
-
-    /** Mid-stop for the default silver foil (also ScratchLayerConfig default color). */
     val foilBaseMid = Color(0xFFC4C9D1)
-
-    /** Light stop for the default silver foil. */
     val foilBaseLight = Color(0xFFE3E6EB)
-
-    /** Highlight stop for the default silver foil. */
     val foilHighlight = Color(0xFFF5F7FA)
-
-    /** Tint stop for the default silver foil. */
     val foilTint = Color(0xFFB0B7C2)
-
-    /** Default chrome border color base. */
     val foilBorderDark = Color(0xFF8B9199)
-
-    /** Default card shadow elevation. */
     val cardElevation = 8.dp
-
-    /** Default card border stroke width. */
     val cardBorderWidth = 0.5.dp
 
     /**
      * Color stops used when drawing a built-in [ScratchCoverPattern].
      *
+     * @param dark darkest foil stop
+     * @param mid mid foil stop
+     * @param light light foil stop
+     * @param highlight specular / highlight stop
+     * @param tint secondary tint stop
+     * @param grain grain / line overlay color
      * @author uditbhaskar
      */
     data class PatternPalette(
@@ -54,6 +49,7 @@ object ScratchDefaults {
      *
      * @param pattern built-in cover texture
      * @param color caller tint blended into mid / light stops
+     * @return palette with [color] mixed into mid, light, and tint
      * @author uditbhaskar
      */
     fun paletteFor(pattern: ScratchCoverPattern, color: Color): PatternPalette {
@@ -95,13 +91,22 @@ object ScratchDefaults {
             )
         }
         return base.copy(
-            mid = lerp(base.mid, color, 0.35f),
-            light = lerp(base.light, color, 0.2f),
-            tint = lerp(base.tint, color, 0.25f),
+            mid = blendColors(base.mid, color, 0.35f),
+            light = blendColors(base.light, color, 0.2f),
+            tint = blendColors(base.tint, color, 0.25f),
         )
     }
 
-    private fun lerp(from: Color, to: Color, fraction: Float): Color {
+    /**
+     * Linearly interpolates between [from] and [to].
+     *
+     * @param from start color
+     * @param to end color
+     * @param fraction blend amount from `0f` to `1f`
+     * @return blended color
+     * @author uditbhaskar
+     */
+    private fun blendColors(from: Color, to: Color, fraction: Float): Color {
         val t = fraction.coerceIn(0f, 1f)
         return Color(
             red = from.red + (to.red - from.red) * t,

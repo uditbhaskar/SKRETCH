@@ -1,30 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:aapt="http://schemas.android.com/aapt"
     android:width="108dp"
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
-    <path android:pathData="M31,63.928c0,0 6.4,-11 12.1,-13.1c7.2,-2.6 26,-1.4 26,-1.4l38.1,38.1L107,108.928l-32,-1L31,63.928z">
+
+    <!-- Scratch card body -->
+    <path
+        android:pathData="M30,38h48c3.3,0 6,2.7 6,6v28c0,3.3 -2.7,6 -6,6h-48c-3.3,0 -6,-2.7 -6,-6v-28c0,-3.3 2.7,-6 6,-6z">
         <aapt:attr name="android:fillColor">
             <gradient
-                android:endX="85.84757"
-                android:endY="92.4963"
-                android:startX="42.9492"
-                android:startY="49.59793"
+                android:startX="30"
+                android:startY="38"
+                android:endX="84"
+                android:endY="78"
                 android:type="linear">
-                <item
-                    android:color="#44000000"
-                    android:offset="0.0" />
-                <item
-                    android:color="#00000000"
-                    android:offset="1.0" />
+                <item android:offset="0.0" android:color="#FFE8ECF1" />
+                <item android:offset="0.45" android:color="#FFC4C9D1" />
+                <item android:offset="1.0" android:color="#FF9AA1AB" />
             </gradient>
         </aapt:attr>
     </path>
+
+    <!-- Soft foil highlight -->
     <path
-        android:fillColor="#FFFFFF"
-        android:fillType="nonZero"
-        android:pathData="M65.3,45.828l3.8,-6.6c0.2,-0.4 0.1,-0.9 -0.3,-1.1c-0.4,-0.2 -0.9,-0.1 -1.1,0.3l-3.9,6.7c-6.3,-2.8 -13.4,-2.8 -19.7,0l-3.9,-6.7c-0.2,-0.4 -0.7,-0.5 -1.1,-0.3C38.8,38.328 38.7,38.828 38.9,39.228l3.8,6.6C36.2,49.428 31.7,56.028 31,63.928h46C76.3,56.028 71.8,49.428 65.3,45.828zM43.4,57.328c-0.8,0 -1.5,-0.5 -1.8,-1.2c-0.3,-0.7 -0.1,-1.5 0.4,-2.1c0.5,-0.5 1.4,-0.7 2.1,-0.4c0.7,0.3 1.2,1 1.2,1.8C45.3,56.528 44.5,57.328 43.4,57.328L43.4,57.328zM64.6,57.328c-0.8,0 -1.5,-0.5 -1.8,-1.2s-0.1,-1.5 0.4,-2.1c0.5,-0.5 1.4,-0.7 2.1,-0.4c0.7,0.3 1.2,1 1.2,1.8C66.5,56.528 65.6,57.328 64.6,57.328L64.6,57.328z"
-        android:strokeWidth="1"
-        android:strokeColor="#00000000" />
+        android:fillColor="#55FFFFFF"
+        android:pathData="M34,42h18c1.1,0 2,0.9 2,2v3c0,1.1 -0.9,2 -2,2h-18c-1.1,0 -2,-0.9 -2,-2v-3c0,-1.1 0.9,-2 2,-2z" />
+
+    <!-- Gold revealed through scratch -->
+    <path
+        android:pathData="M40,48 C50,56 60,64 74,72 L74,72 L54,72 L40,60 Z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:startX="42"
+                android:startY="50"
+                android:endX="72"
+                android:endY="72"
+                android:type="linear">
+                <item android:offset="0.0" android:color="#FFD4AF37" />
+                <item android:offset="1.0" android:color="#FFF5E6A8" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- Scratch stroke edge -->
+    <path
+        android:fillColor="#FF1C1F26"
+        android:fillAlpha="0.18"
+        android:pathData="M39,47 C49,55 59,63 73,71 L70,74 C56,66 46,58 36,50 Z" />
 </vector>

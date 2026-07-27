@@ -254,6 +254,11 @@ fun ScratchCard(
     )
 }
 
+/**
+ * Studio preview of the default silver scratch card.
+ *
+ * @author uditbhaskar
+ */
 @Preview(name = "Default", showBackground = true, backgroundColor = 0xFFF2F4F8)
 @Composable
 private fun ScratchCardPreview() {
@@ -277,6 +282,11 @@ private fun ScratchCardPreview() {
     }
 }
 
+/**
+ * Studio preview of the wallet preset.
+ *
+ * @author uditbhaskar
+ */
 @Preview(name = "Wallet preset", showBackground = true, backgroundColor = 0xFFF2F4F8)
 @Composable
 private fun ScratchCardWalletPreview() {
@@ -290,6 +300,11 @@ private fun ScratchCardWalletPreview() {
     }
 }
 
+/**
+ * Studio preview of a scratch card with custom trailing reward content in night mode.
+ *
+ * @author uditbhaskar
+ */
 @Preview(name = "Dark", showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES, backgroundColor = 0xFF10131A)
 @Composable
 private fun ScratchCardDarkPreview() {
@@ -303,6 +318,11 @@ private fun ScratchCardDarkPreview() {
     }
 }
 
+/**
+ * Sample reward UI used by [ScratchCardDarkPreview].
+ *
+ * @author uditbhaskar
+ */
 @Composable
 private fun ScratchCardPreviewContent() {
     Box(

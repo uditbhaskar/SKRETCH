@@ -67,6 +67,13 @@ object ScratchFoilDrawer {
         return bitmap
     }
 
+    /**
+     * Draws [image] stretched to fill [size].
+     *
+     * @param size destination size in pixels
+     * @param image cover bitmap supplied by [ScratchLayerConfig.image]
+     * @author uditbhaskar
+     */
     private fun DrawScope.drawImageCover(size: Size, image: ImageBitmap) {
         drawImage(
             image = image,
@@ -150,6 +157,13 @@ object ScratchFoilDrawer {
         }
     }
 
+    /**
+     * Draws silver / gold / matte metallic foil into [size].
+     *
+     * @param size layer size in pixels
+     * @param palette color stops for the metallic base
+     * @author uditbhaskar
+     */
     private fun DrawScope.drawMetallicBase(size: Size, palette: ScratchDefaults.PatternPalette) {
         val width = size.width
         val height = size.height
@@ -186,6 +200,13 @@ object ScratchFoilDrawer {
         )
     }
 
+    /**
+     * Draws iridescent holographic foil into [size].
+     *
+     * @param size layer size in pixels
+     * @param palette color stops for the holographic base
+     * @author uditbhaskar
+     */
     private fun DrawScope.drawHolographicBase(size: Size, palette: ScratchDefaults.PatternPalette) {
         drawRect(
             brush = Brush.linearGradient(
@@ -206,6 +227,13 @@ object ScratchFoilDrawer {
         )
     }
 
+    /**
+     * Draws a soft paper-like grain cover into [size].
+     *
+     * @param size layer size in pixels
+     * @param palette color stops for the grain base
+     * @author uditbhaskar
+     */
     private fun DrawScope.drawGrainBase(size: Size, palette: ScratchDefaults.PatternPalette) {
         drawRect(color = palette.mid, size = size)
         drawRect(
@@ -234,6 +262,13 @@ object ScratchFoilDrawer {
         }
     }
 
+    /**
+     * Draws horizontal grain lines across [size] using [grain].
+     *
+     * @param size layer size in pixels
+     * @param grain line color (alpha is applied per line)
+     * @author uditbhaskar
+     */
     private fun DrawScope.drawGrainLines(size: Size, grain: Color) {
         var lineY = 0f
         while (lineY < size.height) {

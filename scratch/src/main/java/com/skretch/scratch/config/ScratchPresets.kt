@@ -19,6 +19,7 @@ object ScratchPresets {
      *
      * @param rewardTitle main-layer title
      * @param rewardSubtitle optional main-layer subtitle
+     * @return bundled [ScratchCardPreset]
      * @author uditbhaskar
      */
     fun promo(
@@ -42,6 +43,7 @@ object ScratchPresets {
      *
      * @param rewardTitle main-layer title
      * @param rewardSubtitle optional main-layer subtitle
+     * @return bundled [ScratchCardPreset]
      * @author uditbhaskar
      */
     fun wallet(
@@ -76,6 +78,7 @@ object ScratchPresets {
      *
      * @param rewardTitle main-layer title
      * @param rewardSubtitle optional main-layer subtitle
+     * @return bundled [ScratchCardPreset]
      * @author uditbhaskar
      */
     fun game(
@@ -107,6 +110,7 @@ object ScratchPresets {
      *
      * @param rewardTitle main-layer title
      * @param rewardSubtitle optional main-layer subtitle
+     * @return bundled [ScratchCardPreset]
      * @author uditbhaskar
      */
     fun matte(
@@ -137,6 +141,7 @@ object ScratchPresets {
      *
      * @param rewardTitle main-layer title
      * @param rewardSubtitle optional main-layer subtitle
+     * @return bundled [ScratchCardPreset]
      * @author uditbhaskar
      */
     fun party(
@@ -168,6 +173,7 @@ object ScratchPresets {
      *
      * @param rewardTitle main-layer title
      * @param rewardSubtitle optional main-layer subtitle
+     * @return bundled [ScratchCardPreset]
      * @author uditbhaskar
      */
     fun minimal(
@@ -206,24 +212,24 @@ object ScratchPresets {
  * Reveal animation, haptic intensity, threshold, and [autoReveal] come from this object
  * (they are not separate parameters on the preset overload).
  *
+ * @param scratchLayer cover surface (pattern, text, shimmer, etc.)
+ * @param mainLayer revealed reward surface
+ * @param brush stamp style and size
+ * @param chrome elevation, border, and outline shape
+ * @param revealThreshold coverage required before auto-reveal
+ * @param revealAnimation how the cover disappears after reveal
+ * @param hapticIntensity first-scratch haptic strength
+ * @param autoReveal when false, call [com.skretch.scratch.state.ScratchState.reveal] yourself
  * @author uditbhaskar
  */
 @Immutable
 data class ScratchCardPreset(
-    /** Cover surface (pattern, text, shimmer, etc.). */
     val scratchLayer: ScratchLayerConfig,
-    /** Revealed reward surface. */
     val mainLayer: MainLayerConfig,
-    /** Stamp style and size. */
     val brush: ScratchBrush,
-    /** Elevation, border, and outline shape. */
     val chrome: ScratchCardChrome = ScratchCardChrome.Default,
-    /** Coverage required before auto-reveal. */
     val revealThreshold: RevealThreshold = RevealThreshold.Default,
-    /** How the cover disappears after reveal. */
     val revealAnimation: ScratchRevealAnimation = ScratchRevealAnimation.Fade,
-    /** First-scratch haptic strength. */
     val hapticIntensity: ScratchHapticIntensity = ScratchHapticIntensity.Medium,
-    /** When false, call [com.skretch.scratch.state.ScratchState.reveal] yourself. */
     val autoReveal: Boolean = true,
 )

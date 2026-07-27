@@ -10,21 +10,20 @@ import com.skretch.scratch.ScratchConstants
  *
  * For reward title / subtitle on the main layer, use [MainLayerText] instead.
  *
+ * Companion [DefaultScratchHint] is the default “SCRATCH HERE” hint for the cover.
+ *
+ * @param text label content (e.g. "SCRATCH HERE")
+ * @param color text color
+ * @param fontSize text size; [TextUnit.Unspecified] lets the foil drawer pick a size from the layer width
  * @author uditbhaskar
  */
 @Immutable
 data class ScratchSurfaceText(
-    /** Label content (e.g. "SCRATCH HERE"). */
     val text: String,
-    /** Text color. */
     val color: Color = Color(0xFF5A606C).copy(alpha = 0.45f),
-    /**
-     * Text size. [TextUnit.Unspecified] lets the foil drawer pick a size from the layer width.
-     */
     val fontSize: TextUnit = TextUnit.Unspecified,
 ) {
     companion object {
-        /** Default “SCRATCH HERE” hint for the cover. */
         val DefaultScratchHint = ScratchSurfaceText(
             text = ScratchConstants.FOIL_LABEL_TEXT,
         )
@@ -34,37 +33,33 @@ data class ScratchSurfaceText(
 /**
  * Built-in cover textures for [ScratchLayerConfig.pattern].
  *
+ * - [Silver]: cool metallic silver foil
+ * - [Gold]: warm metallic gold foil
+ * - [Matte]: flat low-sheen gray surface
+ * - [Holographic]: iridescent multi-hue foil
+ * - [Grain]: soft paper-like grain
+ *
  * @author uditbhaskar
  */
 enum class ScratchCoverPattern {
-    /** Cool metallic silver foil. */
     Silver,
-
-    /** Warm metallic gold foil. */
     Gold,
-
-    /** Flat low-sheen gray surface. */
     Matte,
-
-    /** Iridescent multi-hue foil. */
     Holographic,
-
-    /** Soft paper-like grain. */
     Grain,
 }
 
 /**
  * Brush stamp style for [ScratchBrush.style].
  *
+ * - [Circular]: hard round stamp
+ * - [Smooth]: soft round stamp with feathered edges
+ * - [Hairy]: irregular clustered stamps that feel like bristles
+ *
  * @author uditbhaskar
  */
 enum class ScratchBrushStyle {
-    /** Hard round stamp. */
     Circular,
-
-    /** Soft round stamp with feathered edges. */
     Smooth,
-
-    /** Irregular clustered stamps that feel like bristles. */
     Hairy,
 }

@@ -105,6 +105,15 @@ internal object ScratchBitmapEraser {
         canvas.drawCircle(center.x, center.y, radius, clearPaint)
     }
 
+    /**
+     * Erases a soft circular stamp with a blurred edge controlled by [hardness].
+     *
+     * @param bitmap mutable foil or mask bitmap
+     * @param center stamp center in layer coordinates
+     * @param radius brush radius in pixels
+     * @param hardness edge firmness from `0f` (soft) to `1f` (hard)
+     * @author uditbhaskar
+     */
     private fun eraseSmooth(
         bitmap: ImageBitmap,
         center: Offset,
@@ -122,6 +131,15 @@ internal object ScratchBitmapEraser {
         canvas.drawCircle(center.x, center.y, radius * coreFactor, clearPaint)
     }
 
+    /**
+     * Erases an irregular bristly stamp around [center].
+     *
+     * @param bitmap mutable foil or mask bitmap
+     * @param center stamp center in layer coordinates
+     * @param radius brush radius in pixels
+     * @param hardness edge firmness from `0f` to `1f`; higher values add more bristles
+     * @author uditbhaskar
+     */
     private fun eraseHairy(
         bitmap: ImageBitmap,
         center: Offset,

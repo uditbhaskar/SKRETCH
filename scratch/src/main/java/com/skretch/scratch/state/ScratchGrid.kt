@@ -9,6 +9,9 @@ import kotlin.math.min
 /**
  * Grid-bucket model used to estimate scratch coverage for a card layer.
  *
+ * Derived metrics: [totalCells] (`columns * rows`), [scratchedCount] (buckets marked scratched),
+ * and [progress] (fraction of scratched buckets from `0f` to `1f`).
+ *
  * @param columns number of horizontal buckets
  * @param rows number of vertical buckets
  * @author uditbhaskar
@@ -21,15 +24,12 @@ internal class ScratchGrid(
     private var layerHeight: Float = 0f
     private var scratchedCells: BooleanArray = BooleanArray(0)
 
-    /** Total number of coverage buckets (`columns * rows`). */
     val totalCells: Int
         get() = columns * rows
 
-    /** Number of buckets marked scratched. */
     val scratchedCount: Int
         get() = scratchedCells.count { it }
 
-    /** Fraction of scratched buckets from `0f` to `1f`. */
     val progress: Float
         get() {
             if (totalCells == 0) return 0f
@@ -149,6 +149,7 @@ internal class ScratchGrid(
     /**
      * Approximate brush radius that covers one grid cell when replaying saved coverage.
      *
+     * @return stamp radius in pixels, or `1f` when the layer is uninitialized
      * @author uditbhaskar
      */
     fun cellStampRadius(): Float {

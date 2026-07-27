@@ -20,25 +20,24 @@ import kotlin.math.min
 /**
  * Elevation, border, and outline shape for [com.skretch.scratch.component.ScratchCard].
  *
- * Open this class in the IDE to inspect each property.
+ * Companion [Default] uses default elevation, border, and rounded-rect outline.
  *
+ * @param elevation card shadow elevation
+ * @param borderWidth stroke width around the card
+ * @param borderColor stroke color
+ * @param shape outline family: rounded rect, inscribed circle, or ticket
+ * @param cornerRadius corner radius for [ScratchCardShape.RoundedRect] and [ScratchCardShape.Ticket]
  * @author uditbhaskar
  */
 @Immutable
 data class ScratchCardChrome(
-    /** Card shadow elevation. */
     val elevation: Dp = ScratchDefaults.cardElevation,
-    /** Stroke width around the card. */
     val borderWidth: Dp = ScratchDefaults.cardBorderWidth,
-    /** Stroke color. */
     val borderColor: Color = ScratchDefaults.foilBorderDark.copy(alpha = 0.18f),
-    /** Outline family: rounded rect, inscribed circle, or ticket. */
     val shape: ScratchCardShape = ScratchCardShape.RoundedRect,
-    /** Corner radius for [ScratchCardShape.RoundedRect] and [ScratchCardShape.Ticket]. */
     val cornerRadius: Dp = ScratchConstants.DEFAULT_CORNER_RADIUS.dp,
 ) {
     companion object {
-        /** Default elevation, border, and rounded-rect outline. */
         val Default = ScratchCardChrome()
     }
 
@@ -47,6 +46,7 @@ data class ScratchCardChrome(
      *
      * [ScratchCardShape.Circle] draws a true circle inscribed in the card bounds.
      *
+     * @return Compose [Shape] matching [shape] and [cornerRadius]
      * @author uditbhaskar
      */
     fun toShape(): Shape = when (shape) {
@@ -70,6 +70,15 @@ data class ScratchCardChrome(
  * @author uditbhaskar
  */
 internal object InscribedCircleShape : Shape {
+    /**
+     * Builds a circular outline inscribed in [size].
+     *
+     * @param size layout size in pixels
+     * @param layoutDirection layout direction (unused; circle is direction-agnostic)
+     * @param density screen density (unused; outline is in raw pixels)
+     * @return rounded outline whose diameter is `min(width, height)`
+     * @author uditbhaskar
+     */
     override fun createOutline(
         size: Size,
         layoutDirection: LayoutDirection,
@@ -86,19 +95,20 @@ internal object InscribedCircleShape : Shape {
 /**
  * Optional scratch audio hooks. The library does not ship sound assets; wire your own players.
  *
+ * Companion [Off] disables sound hooks.
+ *
+ * @param enabled when false, callbacks are never invoked
+ * @param onScratchStarted called once on the first scratch drag when [enabled] is true
+ * @param onRevealed called when the card reveals when [enabled] is true
  * @author uditbhaskar
  */
 @Immutable
 data class ScratchSoundConfig(
-    /** When false, callbacks are never invoked. */
     val enabled: Boolean = false,
-    /** Called once on the first scratch drag when [enabled] is true. */
     val onScratchStarted: (() -> Unit)? = null,
-    /** Called when the card reveals when [enabled] is true. */
     val onRevealed: (() -> Unit)? = null,
 ) {
     companion object {
-        /** Sound hooks disabled. */
         val Off = ScratchSoundConfig()
     }
 }
@@ -106,21 +116,22 @@ data class ScratchSoundConfig(
 /**
  * Accessibility strings and TalkBack reveal fallback for [com.skretch.scratch.component.ScratchCard].
  *
+ * Companion [Default] provides built-in English TalkBack strings.
+ *
+ * @param coverContentDescription description while the scratch cover is present
+ * @param revealedContentDescription description after the reward is revealed
+ * @param revealActionLabel TalkBack custom action that forces reveal without scratching
+ * @param announceOnReveal spoken announcement when the card reveals
  * @author uditbhaskar
  */
 @Immutable
 data class ScratchAccessibility(
-    /** Description while the scratch cover is present. */
     val coverContentDescription: String = "Scratch card cover. Scratch to reveal the reward.",
-    /** Description after the reward is revealed. */
     val revealedContentDescription: String = "Scratch card reward revealed.",
-    /** TalkBack custom action that forces reveal without scratching. */
     val revealActionLabel: String = "Reveal reward",
-    /** Spoken announcement when the card reveals. */
     val announceOnReveal: String = "Reward revealed.",
 ) {
     companion object {
-        /** Built-in English TalkBack strings. */
         val Default = ScratchAccessibility()
     }
 }

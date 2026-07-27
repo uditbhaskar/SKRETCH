@@ -3,6 +3,8 @@ package com.skretch.scratch.util
 /**
  * Converts scratch brush width in pixels to the eraser radius used by coverage tracking and foil erasure.
  *
+ * Uses [WIDTH_TO_RADIUS_FACTOR] (`0.5f`) to convert diameter to radius, with a floor of [MIN_RADIUS_PX].
+ *
  * @author uditbhaskar
  */
 internal object ScratchBrushMetrics {

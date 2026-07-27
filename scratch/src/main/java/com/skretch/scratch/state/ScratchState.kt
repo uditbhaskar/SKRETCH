@@ -27,8 +27,16 @@ import com.skretch.scratch.config.ScratchBrushStyle
  * Gesture and brush plumbing (`handleDrag*`, layer size / brush updates, `paintCoverageOnto`)
  * is used by the library overlay; you normally do not call those from app code.
  *
- * [scratchProgress] is between `0f` and `1f`. When auto-reveal is enabled,
- * [isRevealed] becomes `true` once coverage reaches the reveal threshold and progress snaps to `1f`.
+ * Observable state:
+ * - [layerSize]: measured size of the scratch layer in pixels
+ * - [scratchProgress]: scratched coverage from `0f` to `1f`; snaps to `1f` after reveal when auto-reveal is on
+ * - [isRevealed]: whether the cover has been revealed
+ * - [hasStarted]: whether the user has started scratching at least once
+ * - [resetGeneration]: increments when [reset] is called so the foil bitmap can be recreated
+ * - [brushRadiusPx]: brush radius in pixels derived from the current brush width
+ *
+ * When auto-reveal is enabled, [isRevealed] becomes `true` once coverage reaches the reveal
+ * threshold and progress snaps to `1f`.
  *
  * @param initialRevealThreshold fraction of the card that must be scratched before reveal
  * @param initialBrushWidthPx brush width in pixels; kept in sync with foil erasure by ScratchCard
@@ -48,27 +56,18 @@ class ScratchState(
     private var lastDragPoint: Offset? = null
     private var autoRevealEnabled = autoReveal
 
-    /** Measured size of the scratch layer in pixels. */
     var layerSize by mutableStateOf(IntSize.Zero)
         private set
 
-    /** Scratched coverage from `0f` to `1f`; snaps to `1f` after reveal when auto-reveal is on. */
     var scratchProgress by mutableFloatStateOf(0f)
         private set
 
-    /** Whether the cover has been revealed. */
     var isRevealed by mutableStateOf(false)
         private set
 
-    /** Whether the user has started scratching at least once. */
     var hasStarted by mutableStateOf(false)
         private set
 
-    /**
-     * Increments when [reset] is called so the foil bitmap can be recreated.
-     *
-     * @author uditbhaskar
-     */
     var resetGeneration by mutableIntStateOf(0)
         private set
 
@@ -131,11 +130,6 @@ class ScratchState(
         brushHardness = hardness.coerceIn(0f, 1f)
     }
 
-    /**
-     * Brush radius in pixels derived from the current brush width.
-     *
-     * @author uditbhaskar
-     */
     val brushRadiusPx: Float
         get() = ScratchBrushMetrics.radiusFromWidthPx(brushWidthPx)
 
@@ -414,6 +408,13 @@ data class ScratchStateSnapshot(
     val brushStyle: ScratchBrushStyle = ScratchBrushStyle.Circular,
     val brushHardness: Float = 1f,
 ) {
+    /**
+     * Value equality based on coverage, reveal flags, and brush settings.
+     *
+     * @param other object to compare
+     * @return true when all snapshot fields match, including [scratchedCells] contents
+     * @author uditbhaskar
+     */
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is ScratchStateSnapshot) return false
@@ -430,6 +431,12 @@ data class ScratchStateSnapshot(
             brushHardness == other.brushHardness
     }
 
+    /**
+     * Hash code matching [equals], including [scratchedCells] contents.
+     *
+     * @return hash of all snapshot fields
+     * @author uditbhaskar
+     */
     override fun hashCode(): Int {
         var result = layerWidth
         result = 31 * result + layerHeight
@@ -461,7 +468,9 @@ data class StrokeSegment(
 /**
  * Remembers a [ScratchState] across recompositions and configuration changes.
  *
- * Persists coverage, reveal flags, and brush settings via [ScratchStateSaver].
+ * Persists coverage, reveal flags, and brush settings via [ScratchStateSaver], which saves through
+ * [ScratchState.snapshot] / [ScratchState.restore] as Bundle-safe primitives (restore coerces numbers
+ * because `listSaver` often returns [Double] for floats after configuration changes).
  *
  * @param revealThreshold initial reveal threshold
  * @param autoReveal whether crossing the threshold auto-reveals
@@ -478,14 +487,6 @@ fun rememberScratchState(
     )
 }
 
-/**
- * Saves [ScratchState] coverage through [ScratchState.snapshot] / [ScratchState.restore].
- *
- * Values are written as Bundle-safe primitives. Restore coerces numbers because
- * `listSaver` often returns [Double] for floats after configuration changes.
- *
- * @author uditbhaskar
- */
 val ScratchStateSaver: Saver<ScratchState, Any> = listSaver(
     save = { state ->
         val snapshot = state.snapshot()
@@ -537,6 +538,11 @@ val ScratchStateSaver: Saver<ScratchState, Any> = listSaver(
 
 /**
  * Coerces Bundle / listSaver values to [Int] (handles [Double]/[Long]/[Boolean] from restore).
+ *
+ * @param value restored value from the saver list
+ * @param default fallback when [value] is null or unsupported
+ * @return coerced integer
+ * @author uditbhaskar
  */
 internal fun saveableAsInt(value: Any?, default: Int = 0): Int = when (value) {
     null -> default
@@ -551,6 +557,11 @@ internal fun saveableAsInt(value: Any?, default: Int = 0): Int = when (value) {
 
 /**
  * Coerces Bundle / listSaver values to [Float] (handles [Double]/[Int] from restore).
+ *
+ * @param value restored value from the saver list
+ * @param default fallback when [value] is null or unsupported
+ * @return coerced float
+ * @author uditbhaskar
  */
 internal fun saveableAsFloat(value: Any?, default: Float = 0f): Float = when (value) {
     null -> default
@@ -564,6 +575,11 @@ internal fun saveableAsFloat(value: Any?, default: Float = 0f): Float = when (va
 
 /**
  * Coerces Bundle / listSaver values to [Boolean] (handles int / number flags from restore).
+ *
+ * @param value restored value from the saver list
+ * @param default fallback when [value] is null or unsupported
+ * @return coerced boolean
+ * @author uditbhaskar
  */
 internal fun saveableAsBoolean(value: Any?, default: Boolean = false): Boolean = when (value) {
     null -> default

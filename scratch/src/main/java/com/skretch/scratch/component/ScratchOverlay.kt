@@ -266,7 +266,25 @@ internal fun ScratchOverlay(
     }
 }
 
-/** Draws the procedural foil bitmap and routes single- or multitouch erase gestures. */
+/**
+ * Draws the procedural foil bitmap and routes single- or multitouch erase gestures.
+ *
+ * @param foilOverlay mutable foil bitmap that is erased as the user scratches
+ * @param modifier layout / reveal animation modifier for the cover
+ * @param redrawTrigger increments after each erase so the canvas redraws
+ * @param enabled when false, gestures are ignored
+ * @param isRevealed when true, gestures are ignored
+ * @param multiTouchEnabled when true, all active pointers scratch
+ * @param brushRadiusPx brush radius in pixels
+ * @param brushStyle stamp style used for erasure
+ * @param brushHardness stamp hardness `0f..1f`
+ * @param hapticIntensity first-scratch haptic strength
+ * @param state scratch progress and reveal status
+ * @param hapticFeedback Compose haptic bridge
+ * @param view host view for platform haptics
+ * @param onErased called after pixels are cleared so the UI can redraw
+ * @author uditbhaskar
+ */
 @Composable
 private fun BuiltInCoverLayer(
     foilOverlay: ImageBitmap,
@@ -328,7 +346,26 @@ private fun BuiltInCoverLayer(
     }
 }
 
-/** Draws a custom cover composable masked by an erase bitmap. */
+/**
+ * Draws a custom cover composable masked by an erase bitmap.
+ *
+ * @param scratchLayer cover config that supplies the custom composable
+ * @param eraseMask opaque mask cleared as the user scratches ([BlendMode.DstIn])
+ * @param modifier layout / reveal animation modifier for the cover
+ * @param redrawTrigger increments after each erase so the mask redraws
+ * @param enabled when false, gestures are ignored
+ * @param isRevealed when true, gestures are ignored
+ * @param multiTouchEnabled when true, all active pointers scratch
+ * @param brushRadiusPx brush radius in pixels
+ * @param brushStyle stamp style used for erasure
+ * @param brushHardness stamp hardness `0f..1f`
+ * @param hapticIntensity first-scratch haptic strength
+ * @param state scratch progress and reveal status
+ * @param hapticFeedback Compose haptic bridge
+ * @param view host view for platform haptics
+ * @param onErased called after pixels are cleared so the UI can redraw
+ * @author uditbhaskar
+ */
 @Composable
 private fun CustomCoverLayer(
     scratchLayer: ScratchLayerConfig,
@@ -398,7 +435,20 @@ private fun CustomCoverLayer(
     }
 }
 
-/** Single-pointer drag path that stamps / strokes the foil and updates [state]. */
+/**
+ * Single-pointer drag path that stamps / strokes the foil and updates [state].
+ *
+ * @param state scratch progress and reveal status
+ * @param brushRadiusPx brush radius in pixels
+ * @param brushStyle stamp style used for erasure
+ * @param brushHardness stamp hardness `0f..1f`
+ * @param bitmap mutable foil or mask bitmap being erased
+ * @param hapticFeedback Compose haptic bridge
+ * @param view host view for platform haptics
+ * @param hapticIntensity first-scratch haptic strength
+ * @param onErased called after pixels are cleared so the UI can redraw
+ * @author uditbhaskar
+ */
 private suspend fun androidx.compose.ui.input.pointer.PointerInputScope.detectScratchGestures(
     state: ScratchState,
     brushRadiusPx: Float,
@@ -452,7 +502,20 @@ private suspend fun androidx.compose.ui.input.pointer.PointerInputScope.detectSc
     )
 }
 
-/** Multi-pointer path that scratches with every active finger. */
+/**
+ * Multi-pointer path that scratches with every active finger.
+ *
+ * @param state scratch progress and reveal status
+ * @param brushRadiusPx brush radius in pixels
+ * @param brushStyle stamp style used for erasure
+ * @param brushHardness stamp hardness `0f..1f`
+ * @param bitmap mutable foil or mask bitmap being erased
+ * @param hapticFeedback Compose haptic bridge
+ * @param view host view for platform haptics
+ * @param hapticIntensity first-scratch haptic strength
+ * @param onErased called after pixels are cleared so the UI can redraw
+ * @author uditbhaskar
+ */
 private suspend fun androidx.compose.ui.input.pointer.PointerInputScope.detectMultiTouchScratch(
     state: ScratchState,
     brushRadiusPx: Float,
