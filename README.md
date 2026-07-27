@@ -21,16 +21,6 @@ dependencies {
 }
 ```
 
-### Seeing KDocs in Android Studio
-
-Sources ship with the library. After syncing:
-
-1. Open **External Libraries** → `SKRETCH-0.1.2`
-2. Right-click → **Download Sources** (if needed)
-3. Cmd/Ctrl+click any type to open source with comments
-
-Hover a parameter and press **F1** / **Quick Documentation** for the same KDoc.
-
 ## Demo
 
 https://github.com/user-attachments/assets/bca137a7-0787-471a-8a8a-32b7ccf1c141
