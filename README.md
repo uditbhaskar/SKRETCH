@@ -17,7 +17,7 @@ dependencyResolutionManagement {
 }
 
 dependencies {
-    implementation("com.github.uditbhaskar:SKRETCH:0.1.2")
+    implementation("com.github.uditbhaskar:SKRETCH:0.1.3")
 }
 ```
 
