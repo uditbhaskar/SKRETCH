@@ -59,8 +59,10 @@ import com.skretch.scratch.config.ScratchCardPreset
 import com.skretch.scratch.config.ScratchCardShape
 import com.skretch.scratch.config.ScratchCoverPattern
 import com.skretch.scratch.config.ScratchHapticIntensity
+import com.skretch.scratch.config.ScratchHapticMode
 import com.skretch.scratch.config.ScratchLayerConfig
 import com.skretch.scratch.config.ScratchRevealAnimation
+import com.skretch.scratch.config.ScratchSoundConfig
 import com.skretch.scratch.config.ScratchSurfaceText
 import com.skretch.scratch.state.rememberScratchState
 
@@ -88,7 +90,14 @@ fun ScratchCatalogScreen(modifier: Modifier = Modifier) {
     var selectedHaptic by rememberSaveable(stateSaver = enumNameSaver()) {
         mutableStateOf(ScratchHapticIntensity.Medium)
     }
-    var shimmerEnabled by rememberSaveable { mutableStateOf(false) }
+    var shimmerEnabled by rememberSaveable { mutableStateOf(true) }
+    var sparkleEnabled by rememberSaveable { mutableStateOf(false) }
+    var particlesEnabled by rememberSaveable { mutableStateOf(true) }
+    var velocityBrush by rememberSaveable { mutableStateOf(false) }
+    var glowEnabled by rememberSaveable { mutableStateOf(false) }
+    var tiltEnabled by rememberSaveable { mutableStateOf(false) }
+    var soundEnabled by rememberSaveable { mutableStateOf(false) }
+    var continuousHaptics by rememberSaveable { mutableStateOf(true) }
     var multiTouch by rememberSaveable { mutableStateOf(false) }
     var autoReveal by rememberSaveable { mutableStateOf(true) }
     var isFinished by rememberSaveable { mutableStateOf(false) }
@@ -134,7 +143,14 @@ fun ScratchCatalogScreen(modifier: Modifier = Modifier) {
         selectedShape = ScratchCardShape.RoundedRect
         selectedRevealAnimation = ScratchRevealAnimation.Fade
         selectedHaptic = ScratchHapticIntensity.Medium
-        shimmerEnabled = false
+        shimmerEnabled = true
+        sparkleEnabled = false
+        particlesEnabled = true
+        velocityBrush = false
+        glowEnabled = false
+        tiltEnabled = false
+        soundEnabled = false
+        continuousHaptics = true
         multiTouch = false
         autoReveal = true
         resetCard()
@@ -145,6 +161,13 @@ fun ScratchCatalogScreen(modifier: Modifier = Modifier) {
         selectedBrush,
         selectedShape,
         shimmerEnabled,
+        sparkleEnabled,
+        particlesEnabled,
+        velocityBrush,
+        glowEnabled,
+        tiltEnabled,
+        soundEnabled,
+        continuousHaptics,
         autoReveal,
         selectedRevealAnimation,
         selectedHaptic,
@@ -177,9 +200,10 @@ fun ScratchCatalogScreen(modifier: Modifier = Modifier) {
 
     val (cardWidth, cardHeight) = cardSizeForShape(selectedShape)
     val activeBrush = when (selectedBrush) {
-        ScratchBrushStyle.Circular -> ScratchBrush.circular()
-        ScratchBrushStyle.Smooth -> ScratchBrush.smooth(hardness = 0.3f)
-        ScratchBrushStyle.Hairy -> ScratchBrush.hairy()
+        ScratchBrushStyle.Circular -> ScratchBrush.circular(velocityResponsive = velocityBrush)
+        ScratchBrushStyle.Smooth -> ScratchBrush.smooth(hardness = 0.3f, velocityResponsive = velocityBrush)
+        ScratchBrushStyle.Hairy -> ScratchBrush.hairy(velocityResponsive = velocityBrush)
+        ScratchBrushStyle.Glitter -> ScratchBrush.glitter(velocityResponsive = velocityBrush)
     }
 
     Column(
@@ -288,6 +312,53 @@ fun ScratchCatalogScreen(modifier: Modifier = Modifier) {
                 },
             )
             CatalogFilterChip(
+                selected = sparkleEnabled,
+                label = "Sparkle",
+                onClick = {
+                    leavePresetMode()
+                    sparkleEnabled = !sparkleEnabled
+                },
+            )
+            CatalogFilterChip(
+                selected = particlesEnabled,
+                label = "Particles",
+                onClick = { particlesEnabled = !particlesEnabled },
+            )
+            CatalogFilterChip(
+                selected = velocityBrush,
+                label = "Velocity brush",
+                onClick = {
+                    leavePresetMode()
+                    velocityBrush = !velocityBrush
+                },
+            )
+            CatalogFilterChip(
+                selected = glowEnabled,
+                label = "Glow",
+                onClick = {
+                    leavePresetMode()
+                    glowEnabled = !glowEnabled
+                },
+            )
+            CatalogFilterChip(
+                selected = tiltEnabled,
+                label = "Tilt",
+                onClick = {
+                    leavePresetMode()
+                    tiltEnabled = !tiltEnabled
+                },
+            )
+            CatalogFilterChip(
+                selected = soundEnabled,
+                label = "Sound",
+                onClick = { soundEnabled = !soundEnabled },
+            )
+            CatalogFilterChip(
+                selected = continuousHaptics,
+                label = "Haptic drag",
+                onClick = { continuousHaptics = !continuousHaptics },
+            )
+            CatalogFilterChip(
                 selected = multiTouch,
                 label = "Multi-touch",
                 onClick = { multiTouch = !multiTouch },
@@ -316,6 +387,13 @@ fun ScratchCatalogScreen(modifier: Modifier = Modifier) {
                 selectedBrush,
                 selectedShape,
                 shimmerEnabled,
+                sparkleEnabled,
+                particlesEnabled,
+                velocityBrush,
+                glowEnabled,
+                tiltEnabled,
+                soundEnabled,
+                continuousHaptics,
                 autoReveal,
                 selectedRevealAnimation,
                 selectedHaptic,
@@ -326,12 +404,29 @@ fun ScratchCatalogScreen(modifier: Modifier = Modifier) {
                         pattern = selectedPattern,
                         text = ScratchSurfaceText(stringResource(R.string.demo_scratch_foil_label)),
                         shimmer = shimmerEnabled,
+                        sparkle = sparkleEnabled,
                     ),
                     brush = activeBrush,
-                    chrome = ScratchCardChrome(shape = selectedShape),
+                    chrome = ScratchCardChrome(
+                        shape = selectedShape,
+                        glowWidth = if (glowEnabled) 10.dp else 0.dp,
+                        glowColor = Color(0xFF57C5C5),
+                        tiltEnabled = tiltEnabled,
+                    ),
                     revealThreshold = RevealThreshold.Default,
                     revealAnimation = selectedRevealAnimation,
                     hapticIntensity = selectedHaptic,
+                    hapticMode = if (continuousHaptics) {
+                        ScratchHapticMode.Continuous
+                    } else {
+                        ScratchHapticMode.FirstTouch
+                    },
+                    particlesEnabled = particlesEnabled,
+                    sound = if (soundEnabled) {
+                        ScratchSoundConfig.BuiltIn
+                    } else {
+                        ScratchSoundConfig.Off
+                    },
                     autoReveal = autoReveal,
                     multiTouchEnabled = multiTouch,
                     state = scratchState,

@@ -38,6 +38,10 @@ data class ScratchSurfaceText(
  * - [Matte]: flat low-sheen gray surface
  * - [Holographic]: iridescent multi-hue foil
  * - [Grain]: soft paper-like grain
+ * - [Bronze]: warm copper / bronze foil
+ * - [RoseGold]: pink-gold metallic foil
+ * - [Neon]: vivid neon gradient foil
+ * - [Confetti]: festive multi-color speckled foil
  *
  * @author uditbhaskar
  */
@@ -47,6 +51,10 @@ enum class ScratchCoverPattern {
     Matte,
     Holographic,
     Grain,
+    Bronze,
+    RoseGold,
+    Neon,
+    Confetti,
 }
 
 /**
@@ -55,6 +63,7 @@ enum class ScratchCoverPattern {
  * - [Circular]: hard round stamp
  * - [Smooth]: soft round stamp with feathered edges
  * - [Hairy]: irregular clustered stamps that feel like bristles
+ * - [Glitter]: sparkle-style stamp with scattered micro-holes
  *
  * @author uditbhaskar
  */
@@ -62,4 +71,5 @@ enum class ScratchBrushStyle {
     Circular,
     Smooth,
     Hairy,
+    Glitter,
 }

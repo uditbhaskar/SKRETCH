@@ -121,9 +121,14 @@ object ScratchFoilDrawer {
             ScratchCoverPattern.Silver,
             ScratchCoverPattern.Gold,
             ScratchCoverPattern.Matte,
+            ScratchCoverPattern.Bronze,
+            ScratchCoverPattern.RoseGold,
             -> drawMetallicBase(size, palette)
-            ScratchCoverPattern.Holographic -> drawHolographicBase(size, palette)
+            ScratchCoverPattern.Holographic,
+            ScratchCoverPattern.Neon,
+            -> drawHolographicBase(size, palette)
             ScratchCoverPattern.Grain -> drawGrainBase(size, palette)
+            ScratchCoverPattern.Confetti -> drawConfettiBase(size, palette)
         }
     }
 
@@ -259,6 +264,47 @@ object ScratchFoilDrawer {
                 x += 3f
             }
             y += 3f
+        }
+    }
+
+    /**
+     * Draws a festive confetti cover into [size].
+     *
+     * @param size layer size in pixels
+     * @param palette color stops used as confetti tints
+     * @author uditbhaskar
+     */
+    private fun DrawScope.drawConfettiBase(size: Size, palette: ScratchDefaults.PatternPalette) {
+        drawRect(color = palette.dark, size = size)
+        drawRect(
+            brush = Brush.linearGradient(
+                colors = listOf(palette.dark, palette.mid.copy(alpha = 0.35f), palette.dark),
+                start = Offset(0f, 0f),
+                end = Offset(size.width, size.height),
+            ),
+            size = size,
+        )
+        val colors = listOf(palette.mid, palette.light, palette.highlight, palette.tint, palette.grain)
+        var y = 4f
+        while (y < size.height) {
+            var x = 4f
+            while (x < size.width) {
+                val seed = ((x.toInt() * 47) xor (y.toInt() * 97)) and 0xFF
+                if (seed % 4 == 0) {
+                    val c = colors[seed % colors.size].copy(alpha = 0.75f)
+                    if (seed % 3 == 0) {
+                        drawCircle(color = c, radius = 2.2f + (seed % 4), center = Offset(x, y))
+                    } else {
+                        drawRect(
+                            color = c,
+                            topLeft = Offset(x, y),
+                            size = Size(3f + (seed % 5), 2f + (seed % 3)),
+                        )
+                    }
+                }
+                x += 7f
+            }
+            y += 7f
         }
     }
 

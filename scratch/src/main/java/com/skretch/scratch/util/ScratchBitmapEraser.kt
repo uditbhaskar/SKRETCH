@@ -48,6 +48,7 @@ internal object ScratchBitmapEraser {
             ScratchBrushStyle.Circular -> eraseCircle(bitmap, center, radius)
             ScratchBrushStyle.Smooth -> eraseSmooth(bitmap, center, radius, clampedHardness)
             ScratchBrushStyle.Hairy -> eraseHairy(bitmap, center, radius, clampedHardness)
+            ScratchBrushStyle.Glitter -> eraseGlitter(bitmap, center, radius, clampedHardness)
         }
     }
 
@@ -159,6 +160,36 @@ internal object ScratchBitmapEraser {
             val x = center.x + (cos(angle) * distance).toFloat()
             val y = center.y + (sin(angle) * distance).toFloat()
             canvas.drawCircle(x, y, bristleRadius, clearPaint)
+        }
+    }
+
+    /**
+     * Erases a glitter / sparkle stamp of scattered micro-holes around [center].
+     *
+     * @param bitmap mutable foil or mask bitmap
+     * @param center stamp center in layer coordinates
+     * @param radius brush radius in pixels
+     * @param hardness controls sparkle density
+     * @author uditbhaskar
+     */
+    private fun eraseGlitter(
+        bitmap: ImageBitmap,
+        center: Offset,
+        radius: Float,
+        hardness: Float,
+    ) {
+        val canvas = Canvas(bitmap.asAndroidBitmap())
+        val seed = (center.x * 733f).toInt() xor (center.y * 911f).toInt()
+        val random = Random(seed)
+        canvas.drawCircle(center.x, center.y, radius * (0.18f + hardness * 0.2f), clearPaint)
+        val sparks = 10 + (hardness * 14).toInt()
+        repeat(sparks) {
+            val angle = random.nextFloat() * (Math.PI * 2.0)
+            val distance = radius * random.nextFloat()
+            val sparkRadius = radius * (0.04f + random.nextFloat() * 0.14f)
+            val x = center.x + (cos(angle) * distance).toFloat()
+            val y = center.y + (sin(angle) * distance).toFloat()
+            canvas.drawCircle(x, y, sparkRadius, clearPaint)
         }
     }
 }

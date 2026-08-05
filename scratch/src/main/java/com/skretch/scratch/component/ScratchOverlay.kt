@@ -18,6 +18,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.ImageBitmap
@@ -29,42 +30,50 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.semantics.CustomAccessibilityAction
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.customActions
-import androidx.compose.ui.semantics.CustomAccessibilityAction
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.IntSize
+import android.os.SystemClock
 import com.skretch.scratch.ScratchConstants
 import com.skretch.scratch.config.MainLayerConfig
 import com.skretch.scratch.config.ScratchAccessibility
 import com.skretch.scratch.config.ScratchBrush
 import com.skretch.scratch.config.ScratchBrushStyle
 import com.skretch.scratch.config.ScratchHapticIntensity
+import com.skretch.scratch.config.ScratchHapticMode
 import com.skretch.scratch.config.ScratchLayerConfig
 import com.skretch.scratch.config.ScratchRevealAnimation
 import com.skretch.scratch.config.ScratchSoundConfig
+import com.skretch.scratch.design.ScratchDefaults
 import com.skretch.scratch.design.ScratchFoilDrawer
 import com.skretch.scratch.state.ScratchState
 import com.skretch.scratch.util.ScratchBitmapEraser
 import com.skretch.scratch.util.ScratchBrushMetrics
 import com.skretch.scratch.util.ScratchHaptics
+import com.skretch.scratch.util.ScratchSoundPlayer
+import com.skretch.scratch.util.ScratchVelocity
+import com.skretch.scratch.util.rememberScratchSoundPlayer
 
 /**
  * Renders main content under a scratchable cover and wires gestures to [state].
  *
- * Brush radius is derived from [brush] and density so restored cards keep the active size
- * after configuration changes.
- *
  * @param state scratch progress and reveal status
  * @param scratchLayer cover pattern, image, or custom composable
  * @param mainLayer revealed content under the cover
- * @param brush stamp style, diameter, and hardness
+ * @param brush stamp style, diameter, hardness, and optional velocity scaling
  * @param enabled when false, gestures are ignored
  * @param multiTouchEnabled when true, all active pointers scratch
  * @param revealAnimation how the cover disappears after reveal
- * @param hapticIntensity first-scratch haptic strength
- * @param sound optional scratch / reveal sound hooks
+ * @param hapticIntensity scratch haptic strength
+ * @param hapticMode first-touch vs continuous drag haptics
+ * @param particlesEnabled when true, foil flakes emit under the finger
+ * @param sound optional scratch / reveal sound hooks and built-in samples
  * @param accessibility TalkBack labels and reveal action
+ * @param tiltX current parallax tilt on X (degrees), updated while dragging when chrome tilt is on
+ * @param tiltY current parallax tilt on Y (degrees)
+ * @param onTiltChange reports normalized drag position for chrome tilt
  * @param onScratchStarted called the first time scratching begins
  * @param onScratchProgress called when coverage changes
  * @param onRevealed called once when the card reveals
@@ -81,8 +90,11 @@ internal fun ScratchOverlay(
     multiTouchEnabled: Boolean,
     revealAnimation: ScratchRevealAnimation,
     hapticIntensity: ScratchHapticIntensity,
+    hapticMode: ScratchHapticMode,
+    particlesEnabled: Boolean,
     sound: ScratchSoundConfig,
     accessibility: ScratchAccessibility,
+    onTiltChange: (Float, Float) -> Unit,
     onScratchStarted: () -> Unit,
     onScratchProgress: (Float) -> Unit,
     onRevealed: () -> Unit,
@@ -92,10 +104,13 @@ internal fun ScratchOverlay(
     val layoutDirection = LocalLayoutDirection.current
     val hapticFeedback = LocalHapticFeedback.current
     val view = LocalView.current
+    val soundPlayer = rememberScratchSoundPlayer(sound)
+    val particleController = remember { ScratchParticleController() }
     val brushWidthPx = with(density) { brush.width.toPx() }
     val brushRadiusPx = ScratchBrushMetrics.radiusFromWidthPx(brushWidthPx)
     val brushStyle = brush.style
     val brushHardness = brush.hardness
+    val foilParticleColor = ScratchDefaults.paletteFor(scratchLayer.pattern, scratchLayer.color).light
     SideEffect {
         state.updateBrushWidthPx(brushWidthPx)
         state.updateBrushStyle(style = brushStyle, hardness = brushHardness)
@@ -174,7 +189,10 @@ internal fun ScratchOverlay(
     LaunchedEffect(state.hasStarted) {
         if (state.hasStarted) {
             onScratchStarted()
-            if (sound.enabled) sound.onScratchStarted?.invoke()
+            if (sound.enabled) {
+                sound.onScratchStarted?.invoke()
+                soundPlayer?.playScratch(force = true)
+            }
         }
     }
 
@@ -185,7 +203,10 @@ internal fun ScratchOverlay(
     LaunchedEffect(isRevealed) {
         if (isRevealed) {
             onRevealed()
-            if (sound.enabled) sound.onRevealed?.invoke()
+            if (sound.enabled) {
+                sound.onRevealed?.invoke()
+                soundPlayer?.playReveal()
+            }
         }
     }
 
@@ -222,6 +243,19 @@ internal fun ScratchOverlay(
                     scaleY = foilScale
                 }
 
+            val gestureExtras = ScratchGestureExtras(
+                brush = brush,
+                baseRadiusPx = brushRadiusPx,
+                hapticIntensity = hapticIntensity,
+                hapticMode = hapticMode,
+                particlesEnabled = particlesEnabled,
+                particleController = particleController,
+                foilColor = foilParticleColor,
+                soundPlayer = soundPlayer,
+                soundEnabled = sound.enabled && sound.useBuiltIn,
+                onTiltChange = onTiltChange,
+            )
+
             if (hasCustomCover) {
                 CustomCoverLayer(
                     scratchLayer = scratchLayer,
@@ -231,10 +265,9 @@ internal fun ScratchOverlay(
                     enabled = enabled,
                     isRevealed = isRevealed,
                     multiTouchEnabled = multiTouchEnabled,
-                    brushRadiusPx = brushRadiusPx,
                     brushStyle = brushStyle,
                     brushHardness = brushHardness,
-                    hapticIntensity = hapticIntensity,
+                    extras = gestureExtras,
                     state = state,
                     hapticFeedback = hapticFeedback,
                     view = view,
@@ -248,10 +281,9 @@ internal fun ScratchOverlay(
                     enabled = enabled,
                     isRevealed = isRevealed,
                     multiTouchEnabled = multiTouchEnabled,
-                    brushRadiusPx = brushRadiusPx,
                     brushStyle = brushStyle,
                     brushHardness = brushHardness,
-                    hapticIntensity = hapticIntensity,
+                    extras = gestureExtras,
                     state = state,
                     hapticFeedback = hapticFeedback,
                     view = view,
@@ -260,29 +292,39 @@ internal fun ScratchOverlay(
             }
 
             ScratchShimmerOverlay(
-                visible = scratchLayer.shimmer && !isRevealed && foilAlpha > 0.2f,
+                shimmer = scratchLayer.shimmer,
+                sparkle = scratchLayer.sparkle,
+                visible = !isRevealed && foilAlpha > 0.2f,
+            )
+            ScratchParticleOverlay(
+                controller = particleController,
+                visible = particlesEnabled && !isRevealed && foilAlpha > 0.2f,
             )
         }
     }
 }
 
 /**
+ * Shared gesture extras for cover layers.
+ *
+ * @author uditbhaskar
+ */
+internal data class ScratchGestureExtras(
+    val brush: ScratchBrush,
+    val baseRadiusPx: Float,
+    val hapticIntensity: ScratchHapticIntensity,
+    val hapticMode: ScratchHapticMode,
+    val particlesEnabled: Boolean,
+    val particleController: ScratchParticleController,
+    val foilColor: androidx.compose.ui.graphics.Color,
+    val soundPlayer: ScratchSoundPlayer?,
+    val soundEnabled: Boolean,
+    val onTiltChange: (Float, Float) -> Unit,
+)
+
+/**
  * Draws the procedural foil bitmap and routes single- or multitouch erase gestures.
  *
- * @param foilOverlay mutable foil bitmap that is erased as the user scratches
- * @param modifier layout / reveal animation modifier for the cover
- * @param redrawTrigger increments after each erase so the canvas redraws
- * @param enabled when false, gestures are ignored
- * @param isRevealed when true, gestures are ignored
- * @param multiTouchEnabled when true, all active pointers scratch
- * @param brushRadiusPx brush radius in pixels
- * @param brushStyle stamp style used for erasure
- * @param brushHardness stamp hardness `0f..1f`
- * @param hapticIntensity first-scratch haptic strength
- * @param state scratch progress and reveal status
- * @param hapticFeedback Compose haptic bridge
- * @param view host view for platform haptics
- * @param onErased called after pixels are cleared so the UI can redraw
  * @author uditbhaskar
  */
 @Composable
@@ -293,10 +335,9 @@ private fun BuiltInCoverLayer(
     enabled: Boolean,
     isRevealed: Boolean,
     multiTouchEnabled: Boolean,
-    brushRadiusPx: Float,
     brushStyle: ScratchBrushStyle,
     brushHardness: Float,
-    hapticIntensity: ScratchHapticIntensity,
+    extras: ScratchGestureExtras,
     state: ScratchState,
     hapticFeedback: HapticFeedback,
     view: View,
@@ -307,34 +348,33 @@ private fun BuiltInCoverLayer(
             enabled,
             isRevealed,
             foilOverlay,
-            brushRadiusPx,
+            extras.baseRadiusPx,
             brushStyle,
             brushHardness,
             multiTouchEnabled,
+            extras.brush.velocityResponsive,
         ) {
             if (!enabled || isRevealed) return@pointerInput
             if (multiTouchEnabled) {
                 detectMultiTouchScratch(
                     state = state,
-                    brushRadiusPx = brushRadiusPx,
                     brushStyle = brushStyle,
                     brushHardness = brushHardness,
                     bitmap = foilOverlay,
                     hapticFeedback = hapticFeedback,
                     view = view,
-                    hapticIntensity = hapticIntensity,
+                    extras = extras,
                     onErased = onErased,
                 )
             } else {
                 detectScratchGestures(
                     state = state,
-                    brushRadiusPx = brushRadiusPx,
                     brushStyle = brushStyle,
                     brushHardness = brushHardness,
                     bitmap = foilOverlay,
                     hapticFeedback = hapticFeedback,
                     view = view,
-                    hapticIntensity = hapticIntensity,
+                    extras = extras,
                     onErased = onErased,
                 )
             }
@@ -349,21 +389,6 @@ private fun BuiltInCoverLayer(
 /**
  * Draws a custom cover composable masked by an erase bitmap.
  *
- * @param scratchLayer cover config that supplies the custom composable
- * @param eraseMask opaque mask cleared as the user scratches ([BlendMode.DstIn])
- * @param modifier layout / reveal animation modifier for the cover
- * @param redrawTrigger increments after each erase so the mask redraws
- * @param enabled when false, gestures are ignored
- * @param isRevealed when true, gestures are ignored
- * @param multiTouchEnabled when true, all active pointers scratch
- * @param brushRadiusPx brush radius in pixels
- * @param brushStyle stamp style used for erasure
- * @param brushHardness stamp hardness `0f..1f`
- * @param hapticIntensity first-scratch haptic strength
- * @param state scratch progress and reveal status
- * @param hapticFeedback Compose haptic bridge
- * @param view host view for platform haptics
- * @param onErased called after pixels are cleared so the UI can redraw
  * @author uditbhaskar
  */
 @Composable
@@ -375,10 +400,9 @@ private fun CustomCoverLayer(
     enabled: Boolean,
     isRevealed: Boolean,
     multiTouchEnabled: Boolean,
-    brushRadiusPx: Float,
     brushStyle: ScratchBrushStyle,
     brushHardness: Float,
-    hapticIntensity: ScratchHapticIntensity,
+    extras: ScratchGestureExtras,
     state: ScratchState,
     hapticFeedback: HapticFeedback,
     view: View,
@@ -398,34 +422,33 @@ private fun CustomCoverLayer(
                 enabled,
                 isRevealed,
                 eraseMask,
-                brushRadiusPx,
+                extras.baseRadiusPx,
                 brushStyle,
                 brushHardness,
                 multiTouchEnabled,
+                extras.brush.velocityResponsive,
             ) {
                 if (!enabled || isRevealed) return@pointerInput
                 if (multiTouchEnabled) {
                     detectMultiTouchScratch(
                         state = state,
-                        brushRadiusPx = brushRadiusPx,
                         brushStyle = brushStyle,
                         brushHardness = brushHardness,
                         bitmap = eraseMask,
                         hapticFeedback = hapticFeedback,
                         view = view,
-                        hapticIntensity = hapticIntensity,
+                        extras = extras,
                         onErased = onErased,
                     )
                 } else {
                     detectScratchGestures(
                         state = state,
-                        brushRadiusPx = brushRadiusPx,
                         brushStyle = brushStyle,
                         brushHardness = brushHardness,
                         bitmap = eraseMask,
                         hapticFeedback = hapticFeedback,
                         view = view,
-                        hapticIntensity = hapticIntensity,
+                        extras = extras,
                         onErased = onErased,
                     )
                 }
@@ -436,95 +459,173 @@ private fun CustomCoverLayer(
 }
 
 /**
+ * Applies erase + feel effects for a stamp at [point].
+ *
+ * @author uditbhaskar
+ */
+private fun applyScratchStamp(
+    bitmap: ImageBitmap,
+    point: Offset,
+    radius: Float,
+    brushStyle: ScratchBrushStyle,
+    brushHardness: Float,
+    extras: ScratchGestureExtras,
+    hapticFeedback: HapticFeedback,
+    view: View,
+    isFirst: Boolean,
+    onErased: () -> Unit,
+) {
+    ScratchBitmapEraser.eraseStamp(bitmap, point, radius, brushStyle, brushHardness)
+    if (isFirst) {
+        ScratchHaptics.performFirstScratch(hapticFeedback, view, extras.hapticIntensity)
+    } else {
+        ScratchHaptics.performDragTick(
+            hapticFeedback = hapticFeedback,
+            view = view,
+            intensity = extras.hapticIntensity,
+            mode = extras.hapticMode,
+        )
+    }
+    if (extras.particlesEnabled) {
+        extras.particleController.emit(point, extras.foilColor)
+    }
+    if (extras.soundEnabled && !isFirst) {
+        extras.soundPlayer?.playScratch(force = false)
+    }
+    onErased()
+}
+
+/**
+ * Reports normalized tilt from a layer point.
+ *
+ * @author uditbhaskar
+ */
+private fun reportTilt(point: Offset, size: IntSize, extras: ScratchGestureExtras) {
+    if (size.width <= 0 || size.height <= 0) return
+    val nx = ((point.x / size.width) * 2f - 1f).coerceIn(-1f, 1f)
+    val ny = ((point.y / size.height) * 2f - 1f).coerceIn(-1f, 1f)
+    extras.onTiltChange(ny, -nx)
+}
+
+/**
  * Single-pointer drag path that stamps / strokes the foil and updates [state].
  *
- * @param state scratch progress and reveal status
- * @param brushRadiusPx brush radius in pixels
- * @param brushStyle stamp style used for erasure
- * @param brushHardness stamp hardness `0f..1f`
- * @param bitmap mutable foil or mask bitmap being erased
- * @param hapticFeedback Compose haptic bridge
- * @param view host view for platform haptics
- * @param hapticIntensity first-scratch haptic strength
- * @param onErased called after pixels are cleared so the UI can redraw
  * @author uditbhaskar
  */
 private suspend fun androidx.compose.ui.input.pointer.PointerInputScope.detectScratchGestures(
     state: ScratchState,
-    brushRadiusPx: Float,
     brushStyle: ScratchBrushStyle,
     brushHardness: Float,
     bitmap: ImageBitmap,
     hapticFeedback: HapticFeedback,
     view: View,
-    hapticIntensity: ScratchHapticIntensity,
+    extras: ScratchGestureExtras,
     onErased: () -> Unit,
 ) {
+    var lastTime = 0L
     detectDragGestures(
         onDragStart = { offset ->
+            lastTime = SystemClock.uptimeMillis()
             val isFirstScratch = !state.hasStarted
             val stamp = state.handleDragStart(offset)
             if (stamp != null) {
-                if (isFirstScratch) {
-                    ScratchHaptics.performFirstScratch(hapticFeedback, view, hapticIntensity)
-                }
-                ScratchBitmapEraser.eraseStamp(bitmap, stamp, brushRadiusPx, brushStyle, brushHardness)
-                onErased()
+                applyScratchStamp(
+                    bitmap = bitmap,
+                    point = stamp,
+                    radius = extras.baseRadiusPx,
+                    brushStyle = brushStyle,
+                    brushHardness = brushHardness,
+                    extras = extras,
+                    hapticFeedback = hapticFeedback,
+                    view = view,
+                    isFirst = isFirstScratch,
+                    onErased = onErased,
+                )
+                reportTilt(stamp, state.layerSize, extras)
             }
         },
         onDrag = { change, _ ->
             change.consume()
+            val now = SystemClock.uptimeMillis()
+            val elapsed = (now - lastTime).coerceAtLeast(1L)
+            lastTime = now
             val segment = state.handleDrag(change.position)
             if (segment != null) {
+                val distance = (segment.to - segment.from).getDistance()
+                val scale = if (extras.brush.velocityResponsive) {
+                    ScratchVelocity.scaleForStroke(
+                        distancePx = distance,
+                        elapsedMs = elapsed,
+                        minScale = extras.brush.velocityMinScale,
+                        maxScale = extras.brush.velocityMaxScale,
+                    )
+                } else {
+                    1f
+                }
+                val radius = extras.baseRadiusPx * scale
                 if (segment.from == segment.to) {
-                    ScratchBitmapEraser.eraseStamp(
-                        bitmap,
-                        segment.to,
-                        brushRadiusPx,
-                        brushStyle,
-                        brushHardness,
+                    applyScratchStamp(
+                        bitmap = bitmap,
+                        point = segment.to,
+                        radius = radius,
+                        brushStyle = brushStyle,
+                        brushHardness = brushHardness,
+                        extras = extras,
+                        hapticFeedback = hapticFeedback,
+                        view = view,
+                        isFirst = false,
+                        onErased = onErased,
                     )
                 } else {
                     ScratchBitmapEraser.eraseStroke(
                         bitmap,
                         segment.from,
                         segment.to,
-                        brushRadiusPx,
+                        radius,
                         brushStyle,
                         brushHardness,
                     )
+                    ScratchHaptics.performDragTick(
+                        hapticFeedback = hapticFeedback,
+                        view = view,
+                        intensity = extras.hapticIntensity,
+                        mode = extras.hapticMode,
+                    )
+                    if (extras.particlesEnabled) {
+                        extras.particleController.emit(segment.to, extras.foilColor)
+                    }
+                    if (extras.soundEnabled) {
+                        extras.soundPlayer?.playScratch(force = false)
+                    }
+                    onErased()
                 }
-                onErased()
+                reportTilt(segment.to, state.layerSize, extras)
             }
         },
-        onDragEnd = { state.handleDragEnd() },
-        onDragCancel = { state.handleDragEnd() },
+        onDragEnd = {
+            state.handleDragEnd()
+            extras.onTiltChange(0f, 0f)
+        },
+        onDragCancel = {
+            state.handleDragEnd()
+            extras.onTiltChange(0f, 0f)
+        },
     )
 }
 
 /**
  * Multi-pointer path that scratches with every active finger.
  *
- * @param state scratch progress and reveal status
- * @param brushRadiusPx brush radius in pixels
- * @param brushStyle stamp style used for erasure
- * @param brushHardness stamp hardness `0f..1f`
- * @param bitmap mutable foil or mask bitmap being erased
- * @param hapticFeedback Compose haptic bridge
- * @param view host view for platform haptics
- * @param hapticIntensity first-scratch haptic strength
- * @param onErased called after pixels are cleared so the UI can redraw
  * @author uditbhaskar
  */
 private suspend fun androidx.compose.ui.input.pointer.PointerInputScope.detectMultiTouchScratch(
     state: ScratchState,
-    brushRadiusPx: Float,
     brushStyle: ScratchBrushStyle,
     brushHardness: Float,
     bitmap: ImageBitmap,
     hapticFeedback: HapticFeedback,
     view: View,
-    hapticIntensity: ScratchHapticIntensity,
+    extras: ScratchGestureExtras,
     onErased: () -> Unit,
 ) {
     awaitEachGesture {
@@ -532,11 +633,19 @@ private suspend fun androidx.compose.ui.input.pointer.PointerInputScope.detectMu
         val isFirstScratch = !state.hasStarted
         val stamp = state.handleDragStart(down.position)
         if (stamp != null) {
-            if (isFirstScratch) {
-                ScratchHaptics.performFirstScratch(hapticFeedback, view, hapticIntensity)
-            }
-            ScratchBitmapEraser.eraseStamp(bitmap, stamp, brushRadiusPx, brushStyle, brushHardness)
-            onErased()
+            applyScratchStamp(
+                bitmap = bitmap,
+                point = stamp,
+                radius = extras.baseRadiusPx,
+                brushStyle = brushStyle,
+                brushHardness = brushHardness,
+                extras = extras,
+                hapticFeedback = hapticFeedback,
+                view = view,
+                isFirst = isFirstScratch,
+                onErased = onErased,
+            )
+            reportTilt(stamp, state.layerSize, extras)
         }
         do {
             val event = awaitPointerEvent()
@@ -548,11 +657,24 @@ private suspend fun androidx.compose.ui.input.pointer.PointerInputScope.detectMu
                         ScratchBitmapEraser.eraseStamp(
                             bitmap,
                             segment.to,
-                            brushRadiusPx,
+                            extras.baseRadiusPx,
                             brushStyle,
                             brushHardness,
                         )
+                        ScratchHaptics.performDragTick(
+                            hapticFeedback = hapticFeedback,
+                            view = view,
+                            intensity = extras.hapticIntensity,
+                            mode = extras.hapticMode,
+                        )
+                        if (extras.particlesEnabled) {
+                            extras.particleController.emit(segment.to, extras.foilColor)
+                        }
+                        if (extras.soundEnabled) {
+                            extras.soundPlayer?.playScratch(force = false)
+                        }
                         erased = true
+                        reportTilt(segment.to, state.layerSize, extras)
                     }
                     change.consume()
                 }
@@ -560,5 +682,6 @@ private suspend fun androidx.compose.ui.input.pointer.PointerInputScope.detectMu
             if (erased) onErased()
         } while (event.changes.any { it.pressed })
         state.handleDragEnd()
+        extras.onTiltChange(0f, 0f)
     }
 }

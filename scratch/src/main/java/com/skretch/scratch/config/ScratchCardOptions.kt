@@ -40,12 +40,14 @@ enum class ScratchRevealAnimation {
 }
 
 /**
- * Intensity of first-scratch haptic feedback.
+ * Intensity of scratch haptic feedback.
  *
  * - [Off]: no haptic pulse
  * - [Light]: subtle tick
- * - [Medium]: standard first-scratch pulse
+ * - [Medium]: standard scratch pulse
  * - [Strong]: stronger confirm pulse
+ *
+ * Pair with [ScratchHapticMode] for first-touch-only vs continuous drag ticks.
  *
  * @author uditbhaskar
  */

@@ -2,7 +2,7 @@
 
 [![](https://jitpack.io/v/uditbhaskar/SKRETCH.svg)](https://jitpack.io/#uditbhaskar/SKRETCH)
 
-Jetpack Compose scratch cards for promos and rewards. Every look and feel is configurable: cover, reward, brush, chrome, reveal, haptics, sound, and accessibility.
+Jetpack Compose scratch cards for promos and rewards. Every look and feel is configurable: cover, reward, brush, chrome, reveal, haptics, sound, particles, and accessibility.
 
 By [uditbhaskar](https://github.com/uditbhaskar).
 
@@ -138,45 +138,21 @@ Three overloads:
 | `text` | `ScratchSurfaceText?` | `"SCRATCH HERE"` hint | Optional label on the foil |
 | `pattern` | `ScratchCoverPattern` | `Silver` | Built-in foil when `image` / `custom` are null |
 | `image` | `ImageBitmap?` | `null` | Bitmap cover (wins over pattern) |
-| `shimmer` | `Boolean` | `false` | Light sweep across unused cover |
-| `custom` | `(@Composable () -> Unit)?` | `null` | Fully custom cover (highest priority) |
+| `shimmer` | `Boolean` | `true` | Light sweep across unused cover |
+| `sparkle` | `Boolean` | `false` | Optional sparkle loop on unused cover |
+| `custom` | `(@Composable () -> Unit)?` | `null` | Fully custom cover (video / Lottie / anything) |
 
 **Draw priority:** `custom` > `image` > `pattern` + `color` + `text`.
 
+For video covers use `ScratchVideoCover(uri)` inside `custom`. Lottie is not bundled; wrap your own Lottie composable the same way.
+
 #### `ScratchCoverPattern`
 
-| Value | Look |
-|-------|------|
-| `Silver` | Cool metallic silver |
-| `Gold` | Warm metallic gold |
-| `Matte` | Flat low-sheen gray |
-| `Holographic` | Iridescent multi-hue |
-| `Grain` | Soft paper-like grain |
+`Silver`, `Gold`, `Matte`, `Holographic`, `Grain`, `Bronze`, `RoseGold`, `Neon`, `Confetti`.
 
-#### `ScratchSurfaceText` (cover hint only)
+#### QR / barcode peek
 
-| Property | Type | Default | Meaning |
-|----------|------|---------|---------|
-| `text` | `String` | *(required)* | Label content |
-| `color` | `Color` | translucent gray | Text color |
-| `fontSize` | `TextUnit` | `Unspecified` | Unspecified → sized from layer width |
-
-Companion: `ScratchSurfaceText.DefaultScratchHint` → `"SCRATCH HERE"`.
-
-For reward title/subtitle use `MainLayerText`, not this type.
-
-```kotlin
-ScratchLayerConfig(
-    pattern = ScratchCoverPattern.Gold,
-    color = Color(0xFFFFD54F),
-    text = ScratchSurfaceText(
-        text = "SCRATCH TO CLAIM",
-        color = Color.Black.copy(alpha = 0.35f),
-    ),
-    shimmer = true,
-)
-```
-
+Put `ScratchBarcodeReward(code = …, qrBitmap = …)` (or your own QR composable) in `MainLayerConfig.custom` so the code peeks through as the user scratches. `scratchDemoQrBitmap()` is a demo placeholder only; use a real QR encoder in production.
 ---
 
 ### 3. Reward — `MainLayerConfig`
@@ -217,32 +193,12 @@ MainLayerConfig(
 | `style` | `ScratchBrushStyle` | `Circular` | Stamp shape while dragging |
 | `width` | `Dp` | **52.dp** | Brush diameter |
 | `hardness` | `Float` | `0.65f` | Soft (`0f`) → hard (`1f`); mainly affects `Smooth` |
+| `velocityResponsive` | `Boolean` | `false` | Faster swipes widen the trail |
+| `velocityMinScale` / `velocityMaxScale` | `Float` | `0.75` / `1.65` | Scale range when velocity is on |
 
-#### `ScratchBrushStyle`
+Styles: `Circular`, `Smooth`, `Hairy`, `Glitter`.
 
-| Value | Feel |
-|-------|------|
-| `Circular` | Hard round stamp |
-| `Smooth` | Soft round stamp, feathered edges |
-| `Hairy` | Irregular bristly clusters |
-
-#### Factories / presets
-
-| API | Defaults |
-|-----|----------|
-| `ScratchBrush.Circular` | Circular, 52.dp, hardness `0.65f` |
-| `ScratchBrush.Smooth` | Smooth, 52.dp, hardness `0.35f` |
-| `ScratchBrush.Hairy` | Hairy, 52.dp, default hardness |
-| `ScratchBrush.circular(width, hardness)` | `width = 52.dp`, `hardness = 1f` |
-| `ScratchBrush.smooth(width, hardness)` | `width = 52.dp`, `hardness = 0.35f` |
-| `ScratchBrush.hairy(width, hardness)` | `width = 52.dp`, `hardness = 0.5f` |
-
-```kotlin
-ScratchBrush.circular()
-ScratchBrush.smooth(width = 56.dp, hardness = 0.3f)
-ScratchBrush.hairy(width = 64.dp)
-```
-
+Factories: `circular()`, `smooth()`, `hairy()`, `glitter()` (each accepts `velocityResponsive`).
 ---
 
 ### 5. Frame — `ScratchCardChrome`
@@ -254,25 +210,12 @@ ScratchBrush.hairy(width = 64.dp)
 | `borderColor` | `Color` | translucent gray | Stroke color |
 | `shape` | `ScratchCardShape` | `RoundedRect` | Outline family |
 | `cornerRadius` | `Dp` | `12.dp` | Used by `RoundedRect` and `Ticket` |
+| `glowColor` | `Color` | teal | Neon glow color |
+| `glowWidth` | `Dp` | `0.dp` | Outer glow; `0.dp` disables |
+| `tiltEnabled` | `Boolean` | `false` | 3D parallax toward the finger |
+| `tiltDegrees` | `Float` | `8f` | Max tilt when enabled |
 
-#### `ScratchCardShape`
-
-| Value | Outline |
-|-------|---------|
-| `RoundedRect` | Rounded rectangle using `cornerRadius` |
-| `Circle` | True circle inscribed in the bounds (works when width ≠ height) |
-| `Ticket` | Ticket outline with uneven corner radii |
-
-```kotlin
-ScratchCardChrome(
-    shape = ScratchCardShape.Ticket,
-    cornerRadius = 18.dp,
-    elevation = 10.dp,
-    borderWidth = 1.dp,
-    borderColor = Color.Black.copy(alpha = 0.2f),
-)
-```
-
+Shapes: `RoundedRect`, `Circle`, `Ticket`.
 ---
 
 ### 6. Reveal
@@ -302,39 +245,17 @@ state.reveal()
 
 ---
 
-### 7. Haptics — `ScratchHapticIntensity`
+### 7. Haptics / particles / sound
 
-| Value | Meaning |
-|-------|---------|
-| `Off` | No haptic |
-| `Light` | Subtle tick |
-| `Medium` | Standard first-scratch pulse (default) |
-| `Strong` | Stronger confirm pulse |
+| API | Notes |
+|-----|-------|
+| `ScratchHapticIntensity` | `Off`, `Light`, `Medium`, `Strong` |
+| `ScratchHapticMode` | `FirstTouch` or `Continuous` (default) drag ticks |
+| `particlesEnabled` | Foil flake bursts under the finger (default `true`) |
+| `ScratchSoundConfig.BuiltIn` | Packaged scratch + reveal WAV samples |
+| `ScratchSoundConfig.Off` | No audio |
 
-Fired once on the first scratch (not continuously while dragging).
-
----
-
-### 8. Sound — `ScratchSoundConfig`
-
-The library ships **no** audio assets. Wire your own players.
-
-| Property | Type | Default | Meaning |
-|----------|------|---------|---------|
-| `enabled` | `Boolean` | `false` | When `false`, callbacks are never invoked |
-| `onScratchStarted` | `(() -> Unit)?` | `null` | Once on first scratch drag when enabled |
-| `onRevealed` | `(() -> Unit)?` | `null` | When the card reveals when enabled |
-
-Companion: `ScratchSoundConfig.Off`.
-
-```kotlin
-ScratchSoundConfig(
-    enabled = true,
-    onScratchStarted = { /* play scratch SFX */ },
-    onRevealed = { /* play reveal SFX */ },
-)
-```
-
+Callbacks on `ScratchSoundConfig` still fire when `enabled = true` if you want your own players too.
 ---
 
 ### 9. Accessibility — `ScratchAccessibility`

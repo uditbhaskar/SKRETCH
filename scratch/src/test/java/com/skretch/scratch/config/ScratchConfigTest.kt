@@ -21,6 +21,7 @@ class ScratchConfigTest {
         assertEquals(ScratchBrushStyle.Circular, ScratchBrush.Circular.style)
         assertEquals(ScratchBrushStyle.Smooth, ScratchBrush.Smooth.style)
         assertEquals(ScratchBrushStyle.Hairy, ScratchBrush.Hairy.style)
+        assertEquals(ScratchBrushStyle.Glitter, ScratchBrush.Glitter.style)
         assertEquals(64.dp, ScratchBrush.smooth(width = 64.dp).width)
         assertEquals(0.3f, ScratchBrush.smooth(hardness = 0.3f).hardness, 0.001f)
     }
@@ -30,7 +31,8 @@ class ScratchConfigTest {
         assertEquals(ScratchCoverPattern.Silver, ScratchLayerConfig.Default.pattern)
         assertTrue(ScratchLayerConfig.Default.text != null)
         assertTrue(ScratchLayerConfig.Default.custom == null)
-        assertFalse(ScratchLayerConfig.Default.shimmer)
+        assertTrue(ScratchLayerConfig.Default.shimmer)
+        assertFalse(ScratchLayerConfig.Default.sparkle)
     }
 
     @Test

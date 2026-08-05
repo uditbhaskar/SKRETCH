@@ -15,11 +15,21 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -33,8 +43,10 @@ import com.skretch.scratch.config.ScratchAccessibility
 import com.skretch.scratch.config.ScratchBrush
 import com.skretch.scratch.config.ScratchCardChrome
 import com.skretch.scratch.config.ScratchCardPreset
+import com.skretch.scratch.config.ScratchCardShape
 import com.skretch.scratch.config.ScratchCoverPattern
 import com.skretch.scratch.config.ScratchHapticIntensity
+import com.skretch.scratch.config.ScratchHapticMode
 import com.skretch.scratch.config.ScratchLayerConfig
 import com.skretch.scratch.config.ScratchPresets
 import com.skretch.scratch.config.ScratchRevealAnimation
@@ -42,19 +54,22 @@ import com.skretch.scratch.config.ScratchSoundConfig
 import com.skretch.scratch.config.ScratchSurfaceText
 import com.skretch.scratch.state.ScratchState
 import com.skretch.scratch.state.rememberScratchState
+import kotlin.math.min
 
 /**
  * A scratch card with a configurable cover surface and a revealed main surface underneath.
  *
  * @param modifier modifier applied to this card
- * @param scratchLayer cover color, pattern, image, text, shimmer, or custom composable
+ * @param scratchLayer cover color, pattern, image, text, shimmer, sparkle, or custom composable
  * @param mainLayer revealed color, text, or custom composable
- * @param brush brush style, diameter, and hardness
- * @param chrome elevation, border, and outline shape
+ * @param brush brush style, diameter, hardness, and optional velocity scaling
+ * @param chrome elevation, border, outline, glow, and tilt
  * @param revealThreshold coverage required before auto-reveal
  * @param revealAnimation how the cover disappears
- * @param hapticIntensity first-scratch haptic strength
- * @param sound optional scratch / reveal sound hooks
+ * @param hapticIntensity scratch haptic strength
+ * @param hapticMode first-touch vs continuous drag haptics
+ * @param particlesEnabled when true, foil flakes emit under the finger
+ * @param sound optional scratch / reveal sound hooks and built-in samples
  * @param accessibility TalkBack labels and reveal action
  * @param autoReveal when false, call [ScratchState.reveal] yourself
  * @param multiTouchEnabled when true, all active pointers scratch
@@ -75,6 +90,8 @@ fun ScratchCard(
     revealThreshold: RevealThreshold = RevealThreshold.Default,
     revealAnimation: ScratchRevealAnimation = ScratchRevealAnimation.Fade,
     hapticIntensity: ScratchHapticIntensity = ScratchHapticIntensity.Medium,
+    hapticMode: ScratchHapticMode = ScratchHapticMode.Continuous,
+    particlesEnabled: Boolean = true,
     sound: ScratchSoundConfig = ScratchSoundConfig.Off,
     accessibility: ScratchAccessibility = ScratchAccessibility.Default,
     autoReveal: Boolean = true,
@@ -102,9 +119,46 @@ fun ScratchCard(
         scratchState.updateAutoReveal(autoReveal)
     }
 
+    var tiltX by remember { mutableFloatStateOf(0f) }
+    var tiltY by remember { mutableFloatStateOf(0f) }
+    val animatedTiltX by androidx.compose.animation.core.animateFloatAsState(
+        targetValue = if (chrome.tiltEnabled) tiltX * chrome.tiltDegrees else 0f,
+        label = "tiltX",
+    )
+    val animatedTiltY by androidx.compose.animation.core.animateFloatAsState(
+        targetValue = if (chrome.tiltEnabled) tiltY * chrome.tiltDegrees else 0f,
+        label = "tiltY",
+    )
+
     val cardShape = chrome.toShape()
+    val glowWidthPx = with(density) { chrome.glowWidth.toPx() }
     Box(
         modifier = modifier
+            .graphicsLayer {
+                rotationX = animatedTiltX
+                rotationY = animatedTiltY
+                cameraDistance = 16f * density.density
+            }
+            .then(
+                if (glowWidthPx > 0f) {
+                    Modifier.drawBehind {
+                        val stroke = glowWidthPx
+                        val radius = when (chrome.shape) {
+                            ScratchCardShape.Circle -> min(size.width, size.height) / 2f
+                            else -> with(density) { chrome.cornerRadius.toPx() }
+                        }
+                        drawRoundRect(
+                            color = chrome.glowColor.copy(alpha = 0.55f),
+                            topLeft = Offset(-stroke / 2f, -stroke / 2f),
+                            size = Size(size.width + stroke, size.height + stroke),
+                            cornerRadius = CornerRadius(radius + stroke / 2f),
+                            style = Stroke(width = stroke),
+                        )
+                    }
+                } else {
+                    Modifier
+                },
+            )
             .shadow(
                 elevation = chrome.elevation,
                 shape = cardShape,
@@ -126,8 +180,14 @@ fun ScratchCard(
             multiTouchEnabled = multiTouchEnabled,
             revealAnimation = revealAnimation,
             hapticIntensity = hapticIntensity,
+            hapticMode = hapticMode,
+            particlesEnabled = particlesEnabled,
             sound = sound,
             accessibility = accessibility,
+            onTiltChange = { x, y ->
+                tiltX = x
+                tiltY = y
+            },
             onScratchStarted = onScratchStarted,
             onScratchProgress = onScratchProgress,
             onRevealed = onRevealed,
@@ -222,6 +282,8 @@ fun ScratchCard(
     revealThreshold: RevealThreshold = RevealThreshold.Default,
     revealAnimation: ScratchRevealAnimation = ScratchRevealAnimation.Fade,
     hapticIntensity: ScratchHapticIntensity = ScratchHapticIntensity.Medium,
+    hapticMode: ScratchHapticMode = ScratchHapticMode.Continuous,
+    particlesEnabled: Boolean = true,
     sound: ScratchSoundConfig = ScratchSoundConfig.Off,
     accessibility: ScratchAccessibility = ScratchAccessibility.Default,
     autoReveal: Boolean = true,
@@ -242,6 +304,8 @@ fun ScratchCard(
         revealThreshold = revealThreshold,
         revealAnimation = revealAnimation,
         hapticIntensity = hapticIntensity,
+        hapticMode = hapticMode,
+        particlesEnabled = particlesEnabled,
         sound = sound,
         accessibility = accessibility,
         autoReveal = autoReveal,

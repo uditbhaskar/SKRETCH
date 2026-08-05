@@ -18,7 +18,7 @@ import com.skretch.scratch.design.ScratchDefaults
 import kotlin.math.min
 
 /**
- * Elevation, border, and outline shape for [com.skretch.scratch.component.ScratchCard].
+ * Elevation, border, outline, optional glow, and tilt for [com.skretch.scratch.component.ScratchCard].
  *
  * Companion [Default] uses default elevation, border, and rounded-rect outline.
  *
@@ -27,6 +27,10 @@ import kotlin.math.min
  * @param borderColor stroke color
  * @param shape outline family: rounded rect, inscribed circle, or ticket
  * @param cornerRadius corner radius for [ScratchCardShape.RoundedRect] and [ScratchCardShape.Ticket]
+ * @param glowColor neon / glow stroke color; ignored when [glowWidth] is `0.dp`
+ * @param glowWidth outer glow stroke width
+ * @param tiltEnabled when true, the card subtly parallax-tilts toward the finger
+ * @param tiltDegrees max tilt in degrees for parallax
  * @author uditbhaskar
  */
 @Immutable
@@ -36,6 +40,10 @@ data class ScratchCardChrome(
     val borderColor: Color = ScratchDefaults.foilBorderDark.copy(alpha = 0.18f),
     val shape: ScratchCardShape = ScratchCardShape.RoundedRect,
     val cornerRadius: Dp = ScratchConstants.DEFAULT_CORNER_RADIUS.dp,
+    val glowColor: Color = Color(0xFF57C5C5),
+    val glowWidth: Dp = 0.dp,
+    val tiltEnabled: Boolean = false,
+    val tiltDegrees: Float = 8f,
 ) {
     companion object {
         val Default = ScratchCardChrome()
@@ -93,11 +101,12 @@ internal object InscribedCircleShape : Shape {
 }
 
 /**
- * Optional scratch audio hooks. The library does not ship sound assets; wire your own players.
+ * Optional scratch audio. Built-in WAV samples ship with the library; you can also wire callbacks.
  *
- * Companion [Off] disables sound hooks.
+ * Companion [Off] disables sound. [BuiltIn] plays the packaged scratch / reveal samples.
  *
- * @param enabled when false, callbacks are never invoked
+ * @param enabled when false, built-in playback and callbacks are never invoked
+ * @param useBuiltIn when true and [enabled], plays packaged scratch / reveal sounds
  * @param onScratchStarted called once on the first scratch drag when [enabled] is true
  * @param onRevealed called when the card reveals when [enabled] is true
  * @author uditbhaskar
@@ -105,11 +114,13 @@ internal object InscribedCircleShape : Shape {
 @Immutable
 data class ScratchSoundConfig(
     val enabled: Boolean = false,
+    val useBuiltIn: Boolean = true,
     val onScratchStarted: (() -> Unit)? = null,
     val onRevealed: (() -> Unit)? = null,
 ) {
     companion object {
         val Off = ScratchSoundConfig()
+        val BuiltIn = ScratchSoundConfig(enabled = true, useBuiltIn = true)
     }
 }
 

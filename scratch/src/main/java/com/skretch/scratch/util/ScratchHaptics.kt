@@ -2,6 +2,7 @@ package com.skretch.scratch.util
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.os.SystemClock
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.os.VibratorManager
@@ -10,13 +11,16 @@ import android.view.View
 import androidx.compose.ui.hapticfeedback.HapticFeedback
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import com.skretch.scratch.config.ScratchHapticIntensity
+import com.skretch.scratch.config.ScratchHapticMode
 
 /**
- * Scratch-specific haptic feedback fired on the first drag of a card.
+ * Scratch-specific haptic feedback for first touch and optional continuous drag ticks.
  *
  * @author uditbhaskar
  */
 internal object ScratchHaptics {
+
+    private var lastContinuousAtMs: Long = 0L
 
     /**
      * Plays a tactile pulse when the user begins scratching.
@@ -47,6 +51,44 @@ internal object ScratchHaptics {
                 view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS)
                 vibrateScratchPulse(view.context, VibrationEffect.EFFECT_HEAVY_CLICK)
             }
+            ScratchHapticIntensity.Off -> Unit
+        }
+    }
+
+    /**
+     * Plays a light continuous tick while dragging when [mode] is [ScratchHapticMode.Continuous].
+     *
+     * @param hapticFeedback Compose haptic bridge
+     * @param view host view for platform haptics
+     * @param intensity overall haptic strength; [ScratchHapticIntensity.Off] disables ticks
+     * @param mode first-touch-only vs continuous drag ticks
+     * @param minIntervalMs minimum gap between continuous ticks
+     * @author uditbhaskar
+     */
+    fun performDragTick(
+        hapticFeedback: HapticFeedback,
+        view: View,
+        intensity: ScratchHapticIntensity,
+        mode: ScratchHapticMode,
+        minIntervalMs: Long = 32L,
+    ) {
+        if (intensity == ScratchHapticIntensity.Off || mode != ScratchHapticMode.Continuous) return
+        val now = SystemClock.uptimeMillis()
+        if (now - lastContinuousAtMs < minIntervalMs) return
+        lastContinuousAtMs = now
+        when (intensity) {
+            ScratchHapticIntensity.Light -> {
+                view.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
+            }
+            ScratchHapticIntensity.Medium -> {
+                hapticFeedback.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                view.performHapticFeedback(HapticFeedbackConstants.CLOCK_TICK)
+            }
+            ScratchHapticIntensity.Strong -> {
+                hapticFeedback.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                view.performHapticFeedback(HapticFeedbackConstants.CONTEXT_CLICK)
+            }
+            ScratchHapticIntensity.Off -> Unit
         }
     }
 

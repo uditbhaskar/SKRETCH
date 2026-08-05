@@ -89,6 +89,34 @@ object ScratchDefaults {
                 highlight = Color(0xFFF2EBE3),
                 tint = Color(0xFFA89888),
             )
+            ScratchCoverPattern.Bronze -> PatternPalette(
+                dark = Color(0xFF8C5A2B),
+                mid = Color(0xFFB87333),
+                light = Color(0xFFD4A574),
+                highlight = Color(0xFFF0D5B0),
+                tint = Color(0xFFA66B2B),
+            )
+            ScratchCoverPattern.RoseGold -> PatternPalette(
+                dark = Color(0xFFB76E79),
+                mid = Color(0xFFE0A4A8),
+                light = Color(0xFFF3D1D3),
+                highlight = Color(0xFFFFF0F1),
+                tint = Color(0xFFC98B93),
+            )
+            ScratchCoverPattern.Neon -> PatternPalette(
+                dark = Color(0xFF0B1020),
+                mid = Color(0xFF00F5A0),
+                light = Color(0xFF00D9F5),
+                highlight = Color(0xFFF5FF7A),
+                tint = Color(0xFFFF4FD8),
+            )
+            ScratchCoverPattern.Confetti -> PatternPalette(
+                dark = Color(0xFF2D2A32),
+                mid = Color(0xFFFF6B6B),
+                light = Color(0xFFFFD93D),
+                highlight = Color(0xFF6BCB77),
+                tint = Color(0xFF4D96FF),
+            )
         }
         return base.copy(
             mid = blendColors(base.mid, color, 0.35f),
